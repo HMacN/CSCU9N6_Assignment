@@ -11,7 +11,7 @@ public class BackgroundEntity {
 	 * 
 	 * @param sprite
 	 */
-	public BackgroundEntity BackgroundEntity(Sprite sprite) {
+	BackgroundEntity(Sprite sprite) {
 		// TODO - implement BackgroundEntity.BackgroundEntity
 		throw new UnsupportedOperationException();
 	}

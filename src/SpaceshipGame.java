@@ -13,9 +13,9 @@ import java.util.ArrayList;
 public class SpaceshipGame extends GameCore
 {
 
-    private int SCREEN_WIDTH = 1024;
-    private int SCREEN_HEIGHT = 768;
-    private IGameState gameState = new MainMenu();
+    private static int SCREEN_WIDTH = 1024;
+    private static int SCREEN_HEIGHT = 768;
+    private IGameState gameState = new MainMenuState();
     private GamePhysics physics = new GamePhysics();
     private ArrayList<BackgroundEntity> backgroundEntities = new ArrayList<BackgroundEntity>();
     private ArrayList<IPhysicsEntity> physicsEntities = new ArrayList<IPhysicsEntity>();
@@ -26,19 +26,22 @@ public class SpaceshipGame extends GameCore
 	 *
 	 * @param args	The list of parameters this program might use (ignored)
      */
-    public void main(String[] args)
+    public static void main(String[] args)
     {
         SpaceshipGame game = new SpaceshipGame();
-        game.initialiseStartingGameEntities();
+        game.init();
         game.run(false, SCREEN_WIDTH, SCREEN_HEIGHT);
     }
 
 	/**
 	 * Spawn new game entities from the current game state.
 	 */
-	public void initialiseStartingGameEntities()
+	public void init()
     {
-        
+        setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+        setVisible(true);
+
+        loadNewGameState(gameState);
     }
 
     /**
@@ -56,7 +59,6 @@ public class SpaceshipGame extends GameCore
         this.physicsEntities = new ArrayList<IPhysicsEntity>();
 
         //Spawn new in-game entities.
-        initialiseStartingGameEntities();
     }
 
     /**
@@ -65,14 +67,33 @@ public class SpaceshipGame extends GameCore
     @Override
     public void update(long elapsed)
     {
-        // TODO - implement SpaceshipGame.update
-        throw new UnsupportedOperationException();
+        //Update objects the player will interact with.
+        for (IPhysicsEntity physicsEntity : this.physicsEntities)
+        {
+            physicsEntity.update(elapsed);
+        }
+
+        //Update background objects.
+        for (BackgroundEntity backgroundEntity : this.backgroundEntities)
+        {
+            backgroundEntity.update(elapsed);
+        }
     }
 
     @Override
     public void draw(Graphics2D g)
     {
-
+        //Draw background objects.
+        for (BackgroundEntity backgroundEntity : this.backgroundEntities)
+        {
+            backgroundEntity.getSprite().draw(g);
+        }
+        
+        //Draw foreground objects.
+        for (IPhysicsEntity physicsEntity : this.physicsEntities)
+        {
+            //physicsEntity.getSprite.draw(g);
+        }
     }
 
     public void interpretUserInput()

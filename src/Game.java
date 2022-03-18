@@ -12,7 +12,7 @@ import game2D.*;
 // to create our own 'game'. We usually need to implement at
 // least 'draw' and 'update' (not including any local event handling)
 // to begin the process. You should also add code to the 'init'
-// method that will initialiseStartingGameEntities event handlers etc. By default GameCore
+// method that will init event handlers etc. By default GameCore
 // will handle the 'Escape' key to quit the game but you should
 // override this with your own event handler.
 

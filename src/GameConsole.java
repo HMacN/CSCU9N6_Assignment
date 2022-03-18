@@ -1,6 +1,7 @@
 import game2D.Sprite;
 
-public class Interactable implements IPhysicsEntity {
+public class GameConsole implements IPhysicsEntity {
+
     @Override
     public Sprite getSprite()
     {

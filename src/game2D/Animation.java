@@ -207,13 +207,13 @@ public class Animation {
         // deliberately 'overcommented' for clarity when integrating with
     	// main engine
 
-        // initialiseStartingGameEntities image array to return
+        // init image array to return
         Image[] split = new Image[rows*columns];
 
         // easiest way to count as going through sprite sheet as though it is a 2d array
         int count = 0;
 
-        // initialiseStartingGameEntities width & height of split up images
+        // init width & height of split up images
         int width = sheet.getWidth(null)/columns;
         int height = sheet.getHeight(null)/rows;
 

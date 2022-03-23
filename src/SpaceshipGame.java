@@ -2,6 +2,7 @@ import game2D.GameCore;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Game created for CSCU9N6 Computer Games Development.
@@ -13,8 +14,8 @@ import java.util.ArrayList;
 public class SpaceshipGame extends GameCore
 {
     //Set up window size.
-    private static int SCREEN_WIDTH = 1024;
-    private static int SCREEN_HEIGHT = 768;
+    static int SCREEN_WIDTH = 1024;
+    static int SCREEN_HEIGHT = 768;
 
     //Set up arrays of in-game objects.
     private ArrayList<BackgroundEntity> backgroundEntities = new ArrayList<>();
@@ -23,6 +24,7 @@ public class SpaceshipGame extends GameCore
     //Set up classes to handle the in-game logic.
     private IGameState gameState = new MainMenuState(backgroundEntities, physicsEntities);
     private GamePhysics physics = new GamePhysics();
+    private EntityUpdateFactory entityUpdateFactory = new EntityUpdateFactory();
 
     /**
 	 * The obligatory main method that creates
@@ -65,30 +67,50 @@ public class SpaceshipGame extends GameCore
     }
 
     /**
-     * @param elapsedTimeSinceLastUpdate
+     * @param millisSinceLastUpdate
      */
     @Override
-    public void update(long elapsedTimeSinceLastUpdate)
+    public void update(long millisSinceLastUpdate)
     {
+        //Get a new entity update.
+        this.entityUpdateFactory.setMillisSinceLastUpdate(millisSinceLastUpdate);
+        this.entityUpdateFactory.setSpaceshipXSpeed(0.0f);
+        this.entityUpdateFactory.setSpaceshipYSpeed(-0.1f);
+        EntityUpdate updateData = this.entityUpdateFactory.getEntityUpdate();
+
         //Update Game State.
-        this.gameState.update(elapsedTimeSinceLastUpdate);
+        this.gameState.update(updateData);
 
         //Update objects the player will interact with.
         for (IPhysicsEntity physicsEntity : this.physicsEntities)
         {
-            physicsEntity.update(elapsedTimeSinceLastUpdate);
+            physicsEntity.update(updateData);
         }
 
         //Update background objects.
+        LinkedList<BackgroundEntity> entitiesToDelete = new LinkedList<>();
         for (BackgroundEntity backgroundEntity : this.backgroundEntities)
         {
-            backgroundEntity.update(elapsedTimeSinceLastUpdate);
+            //Delete background entities that have travelled off screen.
+            if (backgroundEntity.tooFarOffScreen())
+            {
+                entitiesToDelete.add(backgroundEntity);
+            }
+            else
+            {
+                backgroundEntity.update(updateData);
+            }
         }
+        this.backgroundEntities.removeAll(entitiesToDelete);
     }
 
     @Override
     public void draw(Graphics2D graphics2D)
     {
+        //Fill in background.
+        graphics2D.setColor(Color.BLACK);
+        graphics2D.fillRect(0, 0, getWidth(), getHeight());
+
         //Draw background objects.
         for (BackgroundEntity backgroundEntity : this.backgroundEntities)
         {

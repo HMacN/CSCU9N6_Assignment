@@ -20,8 +20,8 @@ public interface IPhysicsEntity {
 
 	/**
 	 * 
-	 * @param elapsed
+	 * @param millisSinceLastUpdate
 	 */
-	void update(long elapsed);
+	void update(EntityUpdate entityUpdate);
 
 }

@@ -26,7 +26,7 @@ public class Bullet implements IPhysicsEntity {
     }
 
     @Override
-    public void update(long elapsed)
+    public void update(EntityUpdate entityUpdate)
     {
 
     }

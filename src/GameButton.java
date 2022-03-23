@@ -26,7 +26,7 @@ public class GameButton implements IPhysicsEntity {
     }
 
     @Override
-    public void update(long elapsed)
+    public void update(EntityUpdate entityUpdate)
     {
 
     }

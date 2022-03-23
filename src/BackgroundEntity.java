@@ -8,12 +8,11 @@ public class BackgroundEntity {
 	private boolean parallax;
 
 	/**
-	 * 
-	 * @param sprite
+	 *
 	 */
-	BackgroundEntity(Sprite sprite) {
-		// TODO - implement BackgroundEntity.BackgroundEntity
-		throw new UnsupportedOperationException();
+	BackgroundEntity()
+	{
+
 	}
 
 	/**
@@ -32,17 +31,18 @@ public class BackgroundEntity {
 	 * 
 	 * @param sprite
 	 */
-	public void setSprite(Sprite sprite) {
+	public void setSprite(Sprite sprite)
+	{
 		this.sprite = sprite;
 	}
 
 	/**
 	 * 
-	 * @param elapsed
+	 * @param entityUpdate
 	 */
-	public void update(long elapsed) {
-		// TODO - implement BackgroundEntity.update
-		throw new UnsupportedOperationException();
+	public void update(EntityUpdate entityUpdate)
+	{
+		this.sprite.update(entityUpdate.getMillisSinceLastUpdate());
 	}
 
 	public boolean getParallax() {
@@ -57,4 +57,63 @@ public class BackgroundEntity {
 		this.parallax = parallax;
 	}
 
+	public double getXSpeed()
+	{
+		return this.sprite.getVelocityX();
+	}
+
+	public void setXSpeed(float xSpeed)
+	{
+		this.sprite.setVelocityX(xSpeed);
+	}
+
+	public double getYSpeed()
+	{
+		return this.sprite.getVelocityY();
+	}
+
+	public void setYSpeed(float ySpeed)
+	{
+		this.sprite.setVelocityY(ySpeed);
+	}
+
+	public float getXCoord()
+	{
+		return this.sprite.getX();
+	}
+
+	public void setXCoord(float xCoord)
+	{
+		this.sprite.setX(xCoord);
+	}
+
+	public float getYCoord()
+	{
+		return this.sprite.getY();
+	}
+
+	public void setYCoord(float yCoord)
+	{
+		this.sprite.setY(yCoord);
+	}
+
+	public boolean tooFarOffScreen()
+	{
+		boolean farOffScreen = false;
+		int minX = (int) (SpaceshipGame.SCREEN_WIDTH * 0);
+		int maxX = (int) (SpaceshipGame.SCREEN_WIDTH * 1);
+		int minY = (int) (SpaceshipGame.SCREEN_HEIGHT * 0);
+		int maxY = (int) (SpaceshipGame.SCREEN_HEIGHT * 1);
+
+
+		if (this.sprite.getY() < minY
+				|| this.sprite.getY() > maxY
+				|| this.sprite.getX() < minX
+				|| this.sprite.getX() > maxX )
+		{
+			farOffScreen = true;
+		}
+
+		return farOffScreen;
+	}
 }

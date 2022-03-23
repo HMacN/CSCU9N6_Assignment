@@ -4,6 +4,7 @@ public class MainMenuState implements IGameState
 {
     private ArrayList<BackgroundEntity> backgroundEntities;
     private ArrayList<IPhysicsEntity> physicsEntities;
+    private StarfieldGenerator starfieldGenerator = new StarfieldGenerator();
 
     public MainMenuState(ArrayList<BackgroundEntity> backgroundEntities, ArrayList<IPhysicsEntity> physicsEntities)
     {
@@ -12,9 +13,9 @@ public class MainMenuState implements IGameState
     }
 
     @Override
-    public void update(long elapsedTimeSinceLastUpdate)
+    public void update(EntityUpdate entityUpdate)
     {
-        spawnNewStars(elapsedTimeSinceLastUpdate);
+        this.backgroundEntities.addAll(starfieldGenerator.spawnBackgroundStars(entityUpdate));
     }
 
     @Override
@@ -23,19 +24,4 @@ public class MainMenuState implements IGameState
 
     }
 
-    private void spawnNewStars(long elapsedTimeSinceLastUpdate)
-    {
-        int starsToSpawn = (int) elapsedTimeSinceLastUpdate % 1000;
-
-        for (int i = 0; i < starsToSpawn; i++)
-        {
-            BackgroundEntity newStar = generateRandomStar();
-            this.backgroundEntities.add(newStar);
-        }
-    }
-
-    private BackgroundEntity generateRandomStar()
-    {
-        return new BackgroundEntity();
-    }
 }

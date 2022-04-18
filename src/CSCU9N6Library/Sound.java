@@ -81,6 +81,12 @@ public class Sound extends Thread implements IGameSound
         return this.finished;
     }
 
+    @Override
+    public void play()
+    {
+        this.start();
+    }
+
     private class AdjustableFilterInputStream extends FilterInputStream
     {
         private ISoundFilter filter;

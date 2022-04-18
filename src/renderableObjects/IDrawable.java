@@ -13,8 +13,6 @@ public interface IDrawable
 
 	void update(EntityUpdate entityUpdate);
 
-	void setParallax(float parallax);
-
 	double getXSpeed();
 
 	void setXSpeed(float xSpeed);

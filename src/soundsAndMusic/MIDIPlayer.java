@@ -65,4 +65,10 @@ public class MIDIPlayer extends Thread implements IGameSound
     {
         return this.finished;
     }
+
+    @Override
+    public void play()
+    {
+        this.start();
+    }
 }

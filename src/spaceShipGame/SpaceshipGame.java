@@ -7,7 +7,7 @@ import CSCU9N6Library.GameCore;
 import gameStates.IGameState;
 import gameStates.MainMenuState;
 import helperClasses.UserInputHandler;
-import physics.GamePhysics;
+import physics.PhysicsEngine;
 
 import java.awt.*;
 
@@ -28,9 +28,9 @@ public class SpaceshipGame extends GameCore
     private GameObjects gameObjects = new GameObjects();
 
     //Set up classes to handle the in-game logic.
-    private IGameState gameState = new MainMenuState(this);
-    private GamePhysics physics = new GamePhysics();
+    private PhysicsEngine physics = new PhysicsEngine(gameObjects.getPhysicsEntities());
     private EntityUpdateFactory entityUpdateFactory = new EntityUpdateFactory();
+    private IGameState gameState = new MainMenuState(this);
 
     /**
 	 * The obligatory main method that creates
@@ -68,9 +68,6 @@ public class SpaceshipGame extends GameCore
     {
         //Set the new game state.
         this.gameState = newState;
-
-        //Perform first-time set up of the new game state.
-        this.gameState.setEntityUpdateFactory(this.entityUpdateFactory);
     }
 
     /**

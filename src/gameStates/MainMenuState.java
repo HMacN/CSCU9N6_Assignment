@@ -1,5 +1,6 @@
 package gameStates;
 
+import CSCU9N6Library.Sound;
 import helperClasses.*;
 import renderableObjects.BackgroundEntity;
 import CSCU9N6Library.Animation;
@@ -7,6 +8,8 @@ import CSCU9N6Library.Sprite;
 import renderableObjects.GameButton;
 import soundsAndMusic.MIDIPlayer;
 import spaceShipGame.SpaceshipGame;
+
+import javax.sound.sampled.AudioInputStream;
 
 import static helperClasses.GameObjects.ERenderLayer.*;
 
@@ -37,6 +40,7 @@ public class MainMenuState implements IGameState
         this.SCREEN_WIDTH = this.spaceshipGame.getScreenWidth();
         this.SCREEN_HEIGHT = this.spaceshipGame.getScreenHeight();
         this.inputHandler = this.spaceshipGame.getUserInputHandler();
+        this.updateFactory = this.spaceshipGame.getEntityUpdateFactory();
 
         //Set up the menu.
         this.gameObjects.addDrawable(getLaunchPad(), spaceStationLayer);
@@ -54,14 +58,8 @@ public class MainMenuState implements IGameState
 
         //Start playing background music.
         this.backgroundMusic = new MIDIPlayer("sounds/theme.mid");
-        this.backgroundMusic.start();
         //this.backgroundMusic.setSoloTrack(6, true);
         this.gameObjects.addSound(this.backgroundMusic);
-    }
-
-    public void setEntityUpdateFactory(EntityUpdateFactory factory)
-    {
-        this.updateFactory = factory;
     }
 
     public EntityUpdate getUpdate(long millisSinceLastUpdate)
@@ -111,7 +109,7 @@ public class MainMenuState implements IGameState
 
     private void performUpdates()
     {
-        if (this.millisInState > 8_000)
+        if (this.millisInState > 6_000)
         {
             this.updateFactory.setSpaceshipXSpeed(0.0f);
             this.updateFactory.setSpaceshipYSpeed(-0.1f);
@@ -120,7 +118,15 @@ public class MainMenuState implements IGameState
 
     private void buttonOneFunction()
     {
-        this.spaceshipGame.loadNewGameState(new LevelOneGameState());
+        this.spaceshipGame.loadNewGameState(new LevelOneGameState(this.spaceshipGame));
+
+        this.updateFactory.setSpaceshipXSpeed(-0.5f);
+        this.updateFactory.setSpaceshipYSpeed(0.0f);
+
+        this.gameObjects.clearForeground(-0.5f, 0.0f);
+
+        this.gameObjects.addSound(new Sound("sounds/buttonClick.wav"));
+        this.backgroundMusic.stopPlaying();
     }
 
     private class ButtonOneFunctionObject implements IButtonFunctionObject

@@ -13,4 +13,13 @@ public class SpriteFactory
 
         return new Sprite(animation);
     }
+
+    public static Sprite getSpriteFromPNGFile(String filename, int rows, int columns, int frameDuration)
+    {
+        Animation animation = new Animation();
+        animation.loadAnimationFromSheet("images/" + filename + ".png", columns, rows, frameDuration);
+        animation.setLoop(true);
+
+        return new Sprite(animation);
+    }
 }

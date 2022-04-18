@@ -1,5 +1,7 @@
 package helperClasses;
 
+import CSCU9N6Library.Tile;
+import CSCU9N6Library.TileMap;
 import physics.IPhysicsEntity;
 import renderableObjects.IDrawable;
 import soundsAndMusic.IGameSound;
@@ -21,9 +23,19 @@ public class GameObjects
     private ArrayList<IGameSound> sounds = new ArrayList<>();
     private ArrayList<IPhysicsEntity> physicsEntities = new ArrayList<>();
 
+    private TileMap tileMap;
+    private int tileMapXOffset = 0;
+    private int tileMapYOffset = 0;
+
     public void addSound(IGameSound sound)
     {
+        sound.play();
         this.sounds.add(sound);
+    }
+
+    public void addTileMap(TileMap tileMap)
+    {
+        this.tileMap = tileMap;
     }
 
     public void addPhysicsEntity(IPhysicsEntity physicsEntity)
@@ -61,6 +73,11 @@ public class GameObjects
         drawLayer(this.spaceStationLayer, graphics2D);
         drawLayer(this.spaceShipLayer, graphics2D);
         drawLayer(this.UILayer, graphics2D);
+
+        if (this.tileMap != null)
+        {
+            this.tileMap.draw(graphics2D, this.tileMapXOffset, this.tileMapYOffset);
+        }
     }
 
     private void drawLayer(ArrayList<IDrawable> layer, Graphics2D graphics2D)
@@ -73,6 +90,9 @@ public class GameObjects
 
     public void update(EntityUpdate updateData)
     {
+        this.tileMapXOffset = updateData.getPlayerXOffset();
+        this.tileMapYOffset = updateData.getPlayerYOffset();
+
         updatePhysicsObjects(this.physicsEntities, updateData);
         updateSounds(sounds);
 
@@ -103,8 +123,15 @@ public class GameObjects
         sounds.removeAll(entitiesToDelete);
     }
 
+    public ArrayList<IPhysicsEntity> getPhysicsEntities()
+    {
+        return this.physicsEntities;
+    }
+
     private void updatePhysicsObjects(ArrayList<IPhysicsEntity> physicsEntities, EntityUpdate update)
     {
+
+
         LinkedList<IPhysicsEntity> entitiesToDelete = new LinkedList<>();
         for (IPhysicsEntity physicsEntity : physicsEntities)
         {
@@ -141,6 +168,21 @@ public class GameObjects
         layer.removeAll(entitiesToDelete);
     }
 
+    public void clearForeground(float spaceShipXSpeed, float spaceShipYSpeed)
+    {
+        for (IDrawable drawable : this.UILayer)
+        {
+            drawable.setXSpeed(-spaceShipXSpeed);
+            drawable.setYSpeed(-spaceShipYSpeed);
+        }
+
+        for (IDrawable drawable : this.spaceShipLayer)
+        {
+            drawable.setXSpeed(-spaceShipXSpeed);
+            drawable.setYSpeed(-spaceShipYSpeed);
+        }
+    }
+
     public enum ERenderLayer
     {
         starFieldLayer1,
@@ -150,4 +192,6 @@ public class GameObjects
         spaceShipLayer,
         UILayer
     }
+
+
 }

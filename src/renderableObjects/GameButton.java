@@ -57,7 +57,8 @@ public class GameButton implements IDrawable, MouseListener
         this.clickBoundaryRight = (int) this.sprite.getX() + this.sprite.getWidth();
     }
 
-    public void draw(Graphics2D graphics2D)
+    @Override
+    public void draw(Graphics2D graphics2D, float xOffset, float yOffset)
     {
         this.sprite.draw(graphics2D);
     }
@@ -90,7 +91,7 @@ public class GameButton implements IDrawable, MouseListener
 
     }
 
-    public double getXSpeed()
+    public float getXSpeed()
     {
         return this.sprite.getVelocityX();
     }
@@ -101,7 +102,7 @@ public class GameButton implements IDrawable, MouseListener
         this.unPressedSprite.setVelocityX(xSpeed);
     }
 
-    public double getYSpeed()
+    public float getYSpeed()
     {
         return this.sprite.getVelocityY();
     }

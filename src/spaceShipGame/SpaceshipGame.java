@@ -1,6 +1,5 @@
 package spaceShipGame;
 
-import helperClasses.EntityUpdate;
 import helperClasses.EntityUpdateFactory;
 import helperClasses.GameObjects;
 import CSCU9N6Library.GameCore;
@@ -28,7 +27,7 @@ public class SpaceshipGame extends GameCore
     private GameObjects gameObjects = new GameObjects();
 
     //Set up classes to handle the in-game logic.
-    private PhysicsEngine physics = new PhysicsEngine(gameObjects.getPhysicsEntities());
+    private PhysicsEngine physics = new PhysicsEngine(gameObjects.getColliders());
     private EntityUpdateFactory entityUpdateFactory = new EntityUpdateFactory();
     private IGameState gameState = new MainMenuState(this);
 
@@ -55,6 +54,9 @@ public class SpaceshipGame extends GameCore
         this.entityUpdateFactory.setScreenSize(SCREEN_WIDTH, SCREEN_HEIGHT);
         setVisible(true);
 
+        //Register objects with each other.
+        this.gameObjects.setPhysicsEngine(this.physics);
+
         //Load the initial game state.
         loadNewGameState(gameState);
     }
@@ -76,11 +78,8 @@ public class SpaceshipGame extends GameCore
     @Override
     public void update(long millisSinceLastUpdate)
     {
-        //Get a new entity update.
-        EntityUpdate updateData = this.gameState.getUpdate(millisSinceLastUpdate);
-
-        //Update the game objects.
-        this.gameObjects.update(updateData);
+        //Get a new entity update, and apply it to the objects in the game.
+        this.gameObjects.update(this.gameState.getUpdate(millisSinceLastUpdate));
     }
 
     @Override
@@ -117,5 +116,10 @@ public class SpaceshipGame extends GameCore
     public EntityUpdateFactory getEntityUpdateFactory()
     {
         return this.entityUpdateFactory;
+    }
+
+    public PhysicsEngine getPhysics()
+    {
+        return this.physics;
     }
 }

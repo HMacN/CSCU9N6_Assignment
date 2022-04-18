@@ -3,8 +3,8 @@ package helperClasses;
 public class EntityUpdateFactory
 {
     private long millisSinceLastUpdate = 0;
-    private int playerXOffset = 0;
-    private int playerYOffset = 0;
+    private float playerXOffset = 0.0f;
+    private float playerYOffset = 0.0f;
     private float spaceshipXSpeed = 0.0f;
     private float spaceshipYSpeed = 0.0f;
     private int screenWidth = 0;
@@ -33,12 +33,12 @@ public class EntityUpdateFactory
         this.screenHeight = screenHeight;
     }
 
-    public void setPlayerXOffset(int playerXOffset)
+    public void setPlayerXOffset(float playerXOffset)
     {
         this.playerXOffset = playerXOffset;
     }
 
-    public void setPlayerYOffset(int playerYOffset)
+    public void setPlayerYOffset(float playerYOffset)
     {
         this.playerYOffset = playerYOffset;
     }

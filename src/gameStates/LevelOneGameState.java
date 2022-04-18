@@ -5,6 +5,7 @@ import helperClasses.EntityUpdate;
 import helperClasses.EntityUpdateFactory;
 import helperClasses.GameObjects;
 import helperClasses.StarFieldGenerator;
+import physics.PhysicsEngine;
 import renderableObjects.Player;
 import spaceShipGame.SpaceshipGame;
 
@@ -17,7 +18,8 @@ public class LevelOneGameState implements IGameState
     private GameObjects gameObjects;
     private StarFieldGenerator starFieldGenerator = new StarFieldGenerator();
     private TileMap tileMap = new TileMap();
-    private Player player = new Player(200, 200);
+    private Player player;
+    private PhysicsEngine physicsEngine;
 
     private long timeInState = 0;
     private long levelProgressInMillis = 0;
@@ -28,10 +30,17 @@ public class LevelOneGameState implements IGameState
         this.spaceshipGame = spaceshipGame;
         this.updateFactory = this.spaceshipGame.getEntityUpdateFactory();
         this.gameObjects = this.spaceshipGame.getGameObjects();
+        this.physicsEngine = this.spaceshipGame.getPhysics();
 
         this.tileMap.loadMap("maps", "SpaceShipOne.txt");
-        this.gameObjects.addTileMap(this.tileMap);
+        this.gameObjects.addTileMap(this.tileMap, this.spaceshipGame.getScreenWidth(), this.spaceshipGame.getScreenHeight());
+
+        //Set up player.
+        this.player = new Player(this.spaceshipGame.getScreenWidth(), this.spaceshipGame.getScreenHeight(), this.updateFactory, this.spaceshipGame.getUserInputHandler());
         this.gameObjects.addDrawable(this.player, spaceShipLayer);
+        this.gameObjects.addPhysicsEntity(this.player.getCollider());
+
+        this.physicsEngine.setTileMap(this.tileMap);
     }
 
     @Override

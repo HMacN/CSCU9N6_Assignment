@@ -109,7 +109,7 @@ public class MainMenuState implements IGameState
 
     private void performUpdates()
     {
-        if (this.millisInState > 6_000)
+        if (this.millisInState > 4_000)
         {
             this.updateFactory.setSpaceshipXSpeed(0.0f);
             this.updateFactory.setSpaceshipYSpeed(-0.1f);
@@ -118,15 +118,15 @@ public class MainMenuState implements IGameState
 
     private void buttonOneFunction()
     {
-        this.spaceshipGame.loadNewGameState(new LevelOneGameState(this.spaceshipGame));
-
-        this.updateFactory.setSpaceshipXSpeed(-0.5f);
-        this.updateFactory.setSpaceshipYSpeed(0.0f);
-
         this.gameObjects.clearForeground(-0.5f, 0.0f);
 
         this.gameObjects.addSound(new Sound("sounds/buttonClick.wav"));
         this.backgroundMusic.stopPlaying();
+
+        this.spaceshipGame.loadNewGameState(new LevelOneGameState(this.spaceshipGame));
+
+        this.updateFactory.setSpaceshipXSpeed(-0.5f);
+        this.updateFactory.setSpaceshipYSpeed(0.0f);
     }
 
     private class ButtonOneFunctionObject implements IButtonFunctionObject

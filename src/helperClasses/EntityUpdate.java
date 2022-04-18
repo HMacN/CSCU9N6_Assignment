@@ -5,16 +5,16 @@ import java.awt.*;
 public class EntityUpdate
 {
     private final long MILLIS_SINCE_LAST_UPDATE;
-    private final int PLAYER_X_OFFSET;
-    private final int PLAYER_Y_OFFSET;
+    private final float PLAYER_X_OFFSET;
+    private final float PLAYER_Y_OFFSET;
     private final float SPACESHIP_X_SPEED;
     private final float SPACESHIP_Y_SPEED;
     private final int SCREEN_WIDTH;
     private final int SCREEN_HEIGHT;
 
     public EntityUpdate(long millisSinceLastUpdate,
-                        int playerXOffset,
-                        int playerYOffset,
+                        float playerXOffset,
+                        float playerYOffset,
                         float spaceshipXSpeed,
                         float spaceshipYSpeed,
                         int screenWidth,
@@ -44,12 +44,12 @@ public class EntityUpdate
         return MILLIS_SINCE_LAST_UPDATE;
     }
 
-    public int getPlayerXOffset()
+    public float getPlayerXOffset()
     {
         return PLAYER_X_OFFSET;
     }
 
-    public int getPlayerYOffset()
+    public float getPlayerYOffset()
     {
         return PLAYER_Y_OFFSET;
     }

@@ -23,9 +23,13 @@ public class BackgroundEntity implements IDrawable
 		this.maxYCoord = screenHeight;
 	}
 
-	public void draw(Graphics2D graphics2D)
+	public void draw(Graphics2D graphics2D, float xOffset, float yOffset)
 	{
+		this.sprite.setX(this.sprite.getX() + xOffset);
+		this.sprite.setY(this.sprite.getY() + yOffset);
 		this.sprite.draw(graphics2D);
+		this.sprite.setX(this.sprite.getX() - xOffset);
+		this.sprite.setY(this.sprite.getY() - yOffset);
 	}
 
 	/**
@@ -68,7 +72,7 @@ public class BackgroundEntity implements IDrawable
 		this.parallax = parallax;
 	}
 
-	public double getXSpeed()
+	public float getXSpeed()
 	{
 		return this.sprite.getVelocityX();
 	}
@@ -78,7 +82,7 @@ public class BackgroundEntity implements IDrawable
 		this.sprite.setVelocityX(xSpeed);
 	}
 
-	public double getYSpeed()
+	public float getYSpeed()
 	{
 		return this.sprite.getVelocityY();
 	}

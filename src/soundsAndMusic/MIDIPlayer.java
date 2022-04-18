@@ -27,7 +27,16 @@ public class MIDIPlayer extends Thread implements IGameSound
 
     public void stopPlaying()
     {
-        sequencer.close();
+        //Handle the music not having started when instructed to stop.
+        if (sequencer == null)
+        {
+            System.out.println("MIDI Player encountered a problem: No music playing when instructed to stop.");
+        }
+        else
+        {
+            sequencer.close();
+        }
+
         this.finished = true;
     }
 

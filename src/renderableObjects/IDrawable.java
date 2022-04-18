@@ -7,17 +7,17 @@ import java.awt.*;
 
 public interface IDrawable
 {
-	void draw(Graphics2D graphics2D);
+	void draw(Graphics2D graphics2D, float xOffset, float yOffset);
 
 	void setSelfDestructBoundaries(int maxXCoord, int minXCoord, int maxYCoord, int minYCoord);
 
 	void update(EntityUpdate entityUpdate);
 
-	double getXSpeed();
+	float getXSpeed();
 
 	void setXSpeed(float xSpeed);
 
-	double getYSpeed();
+	float getYSpeed();
 
 	void setYSpeed(float ySpeed);
 

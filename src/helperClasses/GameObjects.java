@@ -1,9 +1,11 @@
 package helperClasses;
 
-import CSCU9N6Library.Tile;
 import CSCU9N6Library.TileMap;
+import physics.Collider;
 import physics.IPhysicsEntity;
+import physics.PhysicsEngine;
 import renderableObjects.IDrawable;
+import renderableObjects.Player;
 import soundsAndMusic.IGameSound;
 
 import java.awt.*;
@@ -21,11 +23,14 @@ public class GameObjects
     private ArrayList<IDrawable> UILayer = new ArrayList<>();
 
     private ArrayList<IGameSound> sounds = new ArrayList<>();
-    private ArrayList<IPhysicsEntity> physicsEntities = new ArrayList<>();
+    private ArrayList<Collider> colliders = new ArrayList<>();
+    private PhysicsEngine physicsEngine;
 
     private TileMap tileMap;
-    private int tileMapXOffset = 0;
-    private int tileMapYOffset = 0;
+    private float playerXOffset = 0.0f;
+    private float playerYOffset = 0.0f;
+    private int screenWidth;
+    private int screenHeight;
 
     public void addSound(IGameSound sound)
     {
@@ -33,14 +38,21 @@ public class GameObjects
         this.sounds.add(sound);
     }
 
-    public void addTileMap(TileMap tileMap)
+    public void setPhysicsEngine(PhysicsEngine engine)
     {
-        this.tileMap = tileMap;
+        this.physicsEngine = engine;
     }
 
-    public void addPhysicsEntity(IPhysicsEntity physicsEntity)
+    public void addTileMap(TileMap tileMap, int screenWidth, int screenHeight)
     {
-        this.physicsEntities.add(physicsEntity);
+        this.tileMap = tileMap;
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
+    }
+
+    public void addPhysicsEntity(Collider collider)
+    {
+        this.colliders.add(collider);
     }
 
     public void addDrawable(LinkedList<IDrawable> drawableList, ERenderLayer layer)
@@ -66,34 +78,47 @@ public class GameObjects
 
     public void draw(Graphics2D graphics2D)
     {
-        //Draw background objects.
-        drawLayer(this.starFieldLayer1, graphics2D);
-        drawLayer(this.starFieldLayer2, graphics2D);
-        drawLayer(this.starFieldLayer3, graphics2D);
-        drawLayer(this.spaceStationLayer, graphics2D);
-        drawLayer(this.spaceShipLayer, graphics2D);
-        drawLayer(this.UILayer, graphics2D);
+        drawLayer(this.starFieldLayer1, graphics2D, false);
+        drawLayer(this.starFieldLayer2, graphics2D, false);
+        drawLayer(this.starFieldLayer3, graphics2D, false);
+        drawLayer(this.spaceStationLayer, graphics2D, false);
 
         if (this.tileMap != null)
         {
-            this.tileMap.draw(graphics2D, this.tileMapXOffset, this.tileMapYOffset);
+            this.tileMap.draw(graphics2D, (int) this.playerXOffset, (int) this.playerYOffset);
         }
+
+        drawLayer(this.spaceShipLayer, graphics2D, true);
+        drawLayer(this.UILayer, graphics2D, false);
     }
 
-    private void drawLayer(ArrayList<IDrawable> layer, Graphics2D graphics2D)
+    private void drawLayer(ArrayList<IDrawable> layer, Graphics2D graphics2D, boolean offsetToPlayer)
     {
         for (IDrawable entity : layer)
         {
-            entity.draw(graphics2D);
+            if (offsetToPlayer)
+            {
+                entity.draw(graphics2D, this.playerXOffset, this.playerYOffset);
+            }
+            else
+            {
+                entity.draw(graphics2D, 0.0f, 0.0f);
+            }
+
         }
     }
 
     public void update(EntityUpdate updateData)
     {
-        this.tileMapXOffset = updateData.getPlayerXOffset();
-        this.tileMapYOffset = updateData.getPlayerYOffset();
+        this.playerXOffset = updateData.getPlayerXOffset();
+        this.playerYOffset = updateData.getPlayerYOffset();
 
-        updatePhysicsObjects(this.physicsEntities, updateData);
+        //If there is a physics engine set, and there are physics entities, then do physics updates:
+        if (this.physicsEngine != null && this.colliders.size() > 0)
+        {
+            updatePhysicsObjects(this.colliders, updateData);
+        }
+
         updateSounds(sounds);
 
         updateGraphicsLayer(this.starFieldLayer1, updateData);
@@ -123,30 +148,30 @@ public class GameObjects
         sounds.removeAll(entitiesToDelete);
     }
 
-    public ArrayList<IPhysicsEntity> getPhysicsEntities()
+    public ArrayList<Collider> getColliders()
     {
-        return this.physicsEntities;
+        return this.colliders;
     }
 
-    private void updatePhysicsObjects(ArrayList<IPhysicsEntity> physicsEntities, EntityUpdate update)
+    private void updatePhysicsObjects(ArrayList<Collider> colliders, EntityUpdate update)
     {
-
-
-        LinkedList<IPhysicsEntity> entitiesToDelete = new LinkedList<>();
-        for (IPhysicsEntity physicsEntity : physicsEntities)
+        LinkedList<Collider> collidersToDelete = new LinkedList<>();
+        for (Collider collider : colliders)
         {
             //Delete background entities that have travelled off screen.
-            if (physicsEntity.getSelfDestructStatus())
+            if (collider.getSelfDestructStatus())
             {
-                entitiesToDelete.add(physicsEntity);
+                collidersToDelete.add(collider);
             }
             else
             {
-                physicsEntity.update(update);
+                collider.update(update.getMillisSinceLastUpdate());
             }
         }
 
-        physicsEntities.removeAll(entitiesToDelete);
+        colliders.removeAll(collidersToDelete);
+
+        physicsEngine.update(update);
     }
 
     private void updateGraphicsLayer(ArrayList<IDrawable> layer, EntityUpdate update)
@@ -170,6 +195,8 @@ public class GameObjects
 
     public void clearForeground(float spaceShipXSpeed, float spaceShipYSpeed)
     {
+        this.colliders.clear();
+
         for (IDrawable drawable : this.UILayer)
         {
             drawable.setXSpeed(-spaceShipXSpeed);
@@ -181,6 +208,11 @@ public class GameObjects
             drawable.setXSpeed(-spaceShipXSpeed);
             drawable.setYSpeed(-spaceShipYSpeed);
         }
+    }
+
+    public TileMap getTileMap()
+    {
+        return this.tileMap;
     }
 
     public enum ERenderLayer

@@ -1,4 +1,6 @@
-package helperClasses;
+package factories;
+
+import helperClasses.EntityUpdate;
 
 public class EntityUpdateFactory
 {

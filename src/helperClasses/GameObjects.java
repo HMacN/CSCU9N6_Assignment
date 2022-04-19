@@ -63,6 +63,8 @@ public class GameObjects
 
     public void addDrawable(IDrawable drawable, ERenderLayer layer)
     {
+
+
         switch (layer)
         {
             case UILayer: this.UILayer.add(drawable); break;

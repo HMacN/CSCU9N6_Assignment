@@ -2,10 +2,9 @@ package renderableObjects;
 
 import CSCU9N6Library.Sprite;
 import CSCU9N6Library.TileMap;
-import helperClasses.EntityUpdate;
-import helperClasses.EntityUpdateFactory;
-import helperClasses.SpriteFactory;
-import helperClasses.UserInputHandler;
+import factories.EntityUpdateFactory;
+import factories.SpriteFactory;
+import helperClasses.*;
 import physics.Collider;
 
 import java.awt.*;
@@ -19,14 +18,12 @@ public class Player implements IDrawable, KeyListener
     private Sprite sprite = stillSprite;
     private Collider collider;
 
-    private float minYCoord;
-    private float minXCoord;
-    private float maxYCoord;
-    private float maxXCoord;
-    private boolean selfDestructStatus = false;
+    private boolean selfDestructWhenOffScreen = false;
 
     private float startingX;
     private float startingY;
+    private float screenHeight;
+    private float screenWidth;
 
     private EntityUpdateFactory updateFactory;
     private UserInputHandler inputHandler;
@@ -38,8 +35,10 @@ public class Player implements IDrawable, KeyListener
     private boolean rightKeyPressed = false;
     private float controlAuthority = 0.1f;
 
-    public Player(int screenWidth, int screenHeight, EntityUpdateFactory updateFactory, UserInputHandler inputHandler, TileMap tileMap)
+    public Player(int screenWidth, int screenHeight, EntityUpdateFactory updateFactory, UserInputHandler inputHandler, TileMap tileMap, float xCoord, float yCoord)
     {
+        this.screenHeight = screenHeight;
+        this.screenWidth = screenWidth;
         this.startingX = screenWidth / 2.0f;
         this.startingY = screenHeight / 2.0f;
 
@@ -51,12 +50,7 @@ public class Player implements IDrawable, KeyListener
         this.stillSprite.setY(this.startingY);
         this.stillSprite.setScale(0.70f);
 
-        this.collider = new Collider(this.startingX, this.startingY, 31.0f, 31.0f);
-
-        this.maxXCoord = screenWidth;
-        this.minXCoord = -screenWidth;
-        this.maxYCoord = screenHeight;
-        this.minYCoord = -screenHeight;
+        this.collider = new Collider(xCoord, yCoord, 31.0f, 31.0f);
 
         this.updateFactory = updateFactory;
         this.inputHandler = inputHandler;
@@ -76,12 +70,6 @@ public class Player implements IDrawable, KeyListener
     }
 
     @Override
-    public void setSelfDestructBoundaries(int maxXCoord, int minXCoord, int maxYCoord, int minYCoord)
-    {
-
-    }
-
-    @Override
     public void update(EntityUpdate entityUpdate)
     {
         this.sprite.update(entityUpdate.getMillisSinceLastUpdate());
@@ -94,14 +82,14 @@ public class Player implements IDrawable, KeyListener
 
     private void workOutIfOnLadderAndSetColliderToIgnoreGravityIfSo()
     {
-        if (isThisPointOnALadder(this.collider.getXCoord(), this.collider.getYCoord()) ||
-                isThisPointOnALadder(this.collider.getXCoord() + this.collider.getWidth(), this.collider.getYCoord()))
+        if (TilemapHelper.isThisPointOnALadder(this.collider.getXCoord(), this.collider.getYCoord(), this.tileMap) ||
+                TilemapHelper.isThisPointOnALadder(this.collider.getXCoord() + this.collider.getWidth(), this.collider.getYCoord(), this.tileMap))
         {
             if (!this.collider.isIgnoringGravity())  //If not already on a ladder
             {
                 //Set ignoring gravity, and stop movement as the player "grabs on"
                 this.collider.setIgnoringGravity(true);
-                this.collider.setXSpeed(0.0f);
+                stopHorizontalSpeedOnlyIfNotUnderPlayerControl();   //Only kill x-axis speed if the player is going in the opposite direction from the control inputs.
                 this.collider.setYSpeed(0.0f);
             }
         }
@@ -111,40 +99,10 @@ public class Player implements IDrawable, KeyListener
         }
     }
 
-    private char tileMapChar(float xCoord, float yCoord)
-    {
-        int tileMapX = (int) xCoord / this.tileMap.getTileWidth();
-        int tileMapY = (int) yCoord / this.tileMap.getTileHeight();
-
-        return this.tileMap.getTileChar(tileMapX, tileMapY);
-    }
-
-    private boolean isThisPointOnALadder(float xCoord, float yCoord)
-    {
-        if (tileMapChar(xCoord, yCoord) == 'l')
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    public float getXSpeed()
-    {
-        return this.sprite.getVelocityX();
-    }
-
     @Override
     public void setXSpeed(float xSpeed)
     {
         this.sprite.setVelocityX(xSpeed);
-    }
-
-    @Override
-    public float getYSpeed()
-    {
-        return this.sprite.getVelocityY();
     }
 
     @Override
@@ -153,31 +111,31 @@ public class Player implements IDrawable, KeyListener
         this.sprite.setVelocityY(ySpeed);
     }
 
-    @Override
-    public void setXCoord(float xCoord)
+    public void selfDestructWhenOffScreen()
     {
-        this.sprite.setX(xCoord);
-    }
-
-    @Override
-    public void setYCoord(float yCoord)
-    {
-        this.sprite.setY(yCoord);
+        this.selfDestructWhenOffScreen = true;
     }
 
     @Override
     public boolean getSelfDestructStatus()
     {
-        if (this.sprite.getY() < this.minYCoord
-                || this.sprite.getY() > this.maxYCoord
-                || this.sprite.getX() < this.minXCoord
-                || this.sprite.getX() > this.maxXCoord)
+        if (!this.selfDestructWhenOffScreen)
         {
-            this.selfDestructStatus = true;
-            this.collider.setToSelfDestruct();
+            return false;   //Don't self destruct without being told to do so.
         }
 
-        return this.selfDestructStatus;
+        if (this.sprite.getX() > this.screenWidth || this.sprite.getX() < this.sprite.getWidth())   //If the sprite has gone off the sides of the screen.
+        {
+            return true;
+        }
+
+        if (this.sprite.getY() > this.screenHeight || this.sprite.getY() < this.sprite.getHeight()) //If the sprite has gone off the top or bottom of the screen.
+        {
+            return true;
+        }
+
+        //If the sprite is due for destruction, but is still in view:
+        return false;
     }
 
     @Override
@@ -286,6 +244,21 @@ public class Player implements IDrawable, KeyListener
                 stopIgnoringFrictionIfNoOtherButtonsPressed();
             }
         }
+    }
+
+    private void stopHorizontalSpeedOnlyIfNotUnderPlayerControl()
+    {
+        if (this.collider.getXSpeed() > 0 && this.rightKeyPressed)  //If moving right under player control.
+        {
+            return; //Don't stop player.
+        }
+
+        if (this.collider.getXSpeed() < 0 && this.leftKeyPressed)   //If moving left under player control.
+        {
+            return; //Don't stop player.
+        }
+
+        this.collider.setXSpeed(0.0f);  //Stop player moving horizontally.
     }
 
     private void stopIgnoringFrictionIfNoOtherButtonsPressed()

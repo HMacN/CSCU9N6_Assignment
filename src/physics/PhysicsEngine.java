@@ -2,6 +2,7 @@ package physics;
 
 import CSCU9N6Library.TileMap;
 import helperClasses.EntityUpdate;
+import helperClasses.TilemapHelper;
 
 import java.util.ArrayList;
 
@@ -105,10 +106,10 @@ public class PhysicsEngine
         float bottomEdge = collider.getYCoord() + collider.getHeight();
 
         //Check if there is a collision with the tile map.
-        boolean collidingTopLeft = detectTileMapCollisionAtPoint(leftEdge, topEdge);
-        boolean collidingTopRight = detectTileMapCollisionAtPoint(rightEdge, topEdge);
-        boolean collidingBottomLeft = detectTileMapCollisionAtPoint(leftEdge, bottomEdge);
-        boolean collidingBottomRight = detectTileMapCollisionAtPoint(rightEdge, bottomEdge);
+        boolean collidingTopLeft = TilemapHelper.detectTileMapCollisionAtPoint(leftEdge, topEdge, tileMap);
+        boolean collidingTopRight = TilemapHelper.detectTileMapCollisionAtPoint(rightEdge, topEdge, tileMap);
+        boolean collidingBottomLeft = TilemapHelper.detectTileMapCollisionAtPoint(leftEdge, bottomEdge, tileMap);
+        boolean collidingBottomRight = TilemapHelper.detectTileMapCollisionAtPoint(rightEdge, bottomEdge, tileMap);
 
         //If there is a collision, handle it, otherwise return.
         if (collidingTopLeft || collidingTopRight || collidingBottomLeft || collidingBottomRight)
@@ -290,21 +291,6 @@ public class PhysicsEngine
     private float getXAxisGridOffset(Collider collider)
     {
         return collider.getXCoord() % this.tileMap.getTileWidth();
-    }
-
-    private boolean detectTileMapCollisionAtPoint(float xCoord, float yCoord)
-    {
-        int xTile = (int)(xCoord / this.tileWidth);
-        int yTile = (int)(yCoord / this.tileHeight);
-
-        char tileChar = this.tileMap.getTileChar(xTile, yTile);
-
-        if (tileChar == 'X') // If it's an 'X', it's a collision.
-        {
-            return true;
-        }
-
-        return false;
     }
 
     public enum EFaceOfCollider

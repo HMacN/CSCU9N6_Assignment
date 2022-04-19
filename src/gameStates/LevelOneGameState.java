@@ -1,15 +1,21 @@
 package gameStates;
 
 import CSCU9N6Library.TileMap;
+import factories.CargoCrateFactory;
+import factories.PlayerFactory;
 import helperClasses.EntityUpdate;
-import helperClasses.EntityUpdateFactory;
+import factories.EntityUpdateFactory;
 import helperClasses.GameObjects;
 import helperClasses.StarFieldGenerator;
+import helperClasses.TilemapHelper;
 import physics.PhysicsEngine;
-import renderableObjects.Player;
+import renderableObjects.IDrawable;
 import spaceShipGame.SpaceshipGame;
 
+import java.util.LinkedList;
+
 import static helperClasses.GameObjects.ERenderLayer.*;
+import static helperClasses.TilemapHelper.ETileType.*;
 
 public class LevelOneGameState implements IGameState
 {
@@ -18,8 +24,11 @@ public class LevelOneGameState implements IGameState
     private GameObjects gameObjects;
     private StarFieldGenerator starFieldGenerator = new StarFieldGenerator();
     private TileMap tileMap = new TileMap();
-    private Player player;
+
+    private PlayerFactory playerFactory;
+    private CargoCrateFactory crateFactory;
     private PhysicsEngine physicsEngine;
+    private LinkedList<IDrawable> thingsToDeleteAtTheEnd = new LinkedList<>();
 
     private long timeInState = 0;
     private long levelProgressInMillis = 0;
@@ -34,34 +43,14 @@ public class LevelOneGameState implements IGameState
 
         this.tileMap.loadMap("maps", "SpaceShipOne.txt");
         this.gameObjects.addTileMap(this.tileMap, this.spaceshipGame.getScreenWidth(), this.spaceshipGame.getScreenHeight());
-
-        //Set up player.
-        this.player = new Player(this.spaceshipGame.getScreenWidth(), this.spaceshipGame.getScreenHeight(), this.updateFactory, this.spaceshipGame.getUserInputHandler(), this.tileMap);
-        this.gameObjects.addDrawable(this.player, spaceShipLayer);
-        this.gameObjects.addPhysicsEntity(this.player.getCollider());
-
         this.physicsEngine.setTileMap(this.tileMap);
 
-        spawnCargoCrates();
-    }
+        this.playerFactory = new PlayerFactory(this.spaceshipGame, this.gameObjects);
+        this.crateFactory = new CargoCrateFactory(this.spaceshipGame, this.gameObjects);
+        //this.cargoCrateFactory = new CargoCrateFactory();
 
-    private void spawnCargoCrates()
-    {
-        for (int tileMapXCoord = 0; tileMapXCoord < this.tileMap.getMapWidth(); tileMapXCoord++)
-        {
-            for (int tileMapYCoord = 0; tileMapYCoord < this.tileMap.getMapHeight(); tileMapYCoord++)
-            {
-                if (this.tileMap.getTileChar(tileMapXCoord, tileMapYCoord) == 'c')
-                {
-                    spawnCargoCrate(tileMapXCoord * this.tileMap.getTileWidth(), tileMapYCoord * this.tileMap.getTileHeight());
-                }
-            }
-        }
-    }
-
-    private void spawnCargoCrate(float xCoord, float yCoord)
-    {
-        //TODO add cargo crate spawner
+        TilemapHelper.spawnEntityOnMap(player, this.tileMap, this.playerFactory);
+        TilemapHelper.spawnEntityOnMap(cargoCrate, this.tileMap, this.crateFactory);
     }
 
     @Override

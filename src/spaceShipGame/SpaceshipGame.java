@@ -1,6 +1,6 @@
 package spaceShipGame;
 
-import helperClasses.EntityUpdateFactory;
+import factories.EntityUpdateFactory;
 import helperClasses.GameObjects;
 import CSCU9N6Library.GameCore;
 import gameStates.IGameState;

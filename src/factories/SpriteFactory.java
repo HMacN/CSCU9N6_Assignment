@@ -1,4 +1,4 @@
-package helperClasses;
+package factories;
 
 import CSCU9N6Library.Animation;
 import CSCU9N6Library.Sprite;

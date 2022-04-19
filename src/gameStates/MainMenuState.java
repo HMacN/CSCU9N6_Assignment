@@ -1,6 +1,8 @@
 package gameStates;
 
 import CSCU9N6Library.Sound;
+import factories.EntityUpdateFactory;
+import factories.SpriteFactory;
 import helperClasses.*;
 import renderableObjects.BackgroundEntity;
 import CSCU9N6Library.Animation;
@@ -8,8 +10,6 @@ import CSCU9N6Library.Sprite;
 import renderableObjects.GameButton;
 import soundsAndMusic.MIDIPlayer;
 import spaceShipGame.SpaceshipGame;
-
-import javax.sound.sampled.AudioInputStream;
 
 import static helperClasses.GameObjects.ERenderLayer.*;
 

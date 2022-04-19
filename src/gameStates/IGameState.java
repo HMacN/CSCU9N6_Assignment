@@ -1,7 +1,6 @@
 package gameStates;
 
 import helperClasses.EntityUpdate;
-import helperClasses.EntityUpdateFactory;
 
 public interface IGameState
 {

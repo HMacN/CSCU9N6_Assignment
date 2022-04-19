@@ -9,7 +9,7 @@ public class PhysicsEngine
 {
     private ArrayList<Collider> colliders;
     private TileMap tileMap;
-    private float xAxisGravityPerMilli = 0.000_1f;
+    private float xAxisGravityPerMilli = 0.000_0f;
     private float yAxisGravityPerMilli = 0.000_1f;
     private float frictionChangePerMilli = 0.000_4f;
     private float tileWidth;
@@ -70,6 +70,11 @@ public class PhysicsEngine
 
     private void handleFriction(Collider collider, float frictionChangeFactor)
     {
+        if (collider.isIgnoreFriction())
+        {
+            return;
+        }
+
         //Apply an amount of friction so that objects come to a stop.
         collider.setYSpeed(collider.getYSpeed() * (1 - frictionChangeFactor));
         collider.setXSpeed(collider.getXSpeed() * (1 - frictionChangeFactor));

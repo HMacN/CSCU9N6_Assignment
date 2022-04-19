@@ -11,6 +11,7 @@ public class Collider
     private boolean selfDestruct = false;
     private boolean ignoringGravity = false;
     private boolean ignoringDownwardsGravity = false;
+    private boolean ignoreFriction = false;
 
     public Collider(float xCoord, float yCoord, float width, float height)
     {
@@ -110,5 +111,15 @@ public class Collider
     public void setIgnoringDownwardsGravity(boolean ignoringDownwardsGravity)
     {
         this.ignoringDownwardsGravity = ignoringDownwardsGravity;
+    }
+
+    public boolean isIgnoreFriction()
+    {
+        return ignoreFriction;
+    }
+
+    public void setIgnoreFriction(boolean ignoreFriction)
+    {
+        this.ignoreFriction = ignoreFriction;
     }
 }

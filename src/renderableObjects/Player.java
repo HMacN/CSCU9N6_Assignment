@@ -31,6 +31,12 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
     private UserInputHandler inputHandler;
     private TileMap tileMap;
 
+    private boolean upKeyPressed = false;
+    private boolean downKeyPressed = false;
+    private boolean leftKeyPressed = false;
+    private boolean rightKeyPressed = false;
+    private float controlAuthority = 0.07f;
+
     public Player(int screenWidth, int screenHeight, EntityUpdateFactory updateFactory, UserInputHandler inputHandler, TileMap tileMap)
     {
         this.startingX = screenWidth / 2.0f;
@@ -105,8 +111,6 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
         int tileMapX = (int) xCoord / this.tileMap.getTileWidth();
         int tileMapY = (int) yCoord / this.tileMap.getTileHeight();
 
-        System.out.println(this.tileMap.getTileChar(tileMapX, tileMapY));
-
         return this.tileMap.getTileChar(tileMapX, tileMapY);
     }
 
@@ -162,7 +166,7 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
         if (this.sprite.getY() < this.minYCoord
                 || this.sprite.getY() > this.maxYCoord
                 || this.sprite.getX() < this.minXCoord
-                || this.sprite.getX() > this.maxXCoord )
+                || this.sprite.getX() > this.maxXCoord)
         {
             this.selfDestructStatus = true;
             this.collider.setToSelfDestruct();
@@ -181,37 +185,44 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
     public void keyPressed(KeyEvent e)
     {
         int keyCode = e.getKeyCode();
-        float controlSpeedChange = 0.07f;
 
         if (keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_KP_UP)
         {
-            if (this.collider.getYSpeed() > -controlSpeedChange)    //Only if the player speed is less than the control speed.
+            if (!this.upKeyPressed)    //Only if the key isn't already down.
             {
-                this.collider.setYSpeed(this.collider.getYSpeed() - controlSpeedChange);    //Bring the player speed up to the control speed.
+                this.upKeyPressed = true;
+                this.collider.setYSpeed(this.collider.getYSpeed() - this.controlAuthority);    //Add control speed to the player.
+                this.collider.setIgnoreFriction(true);  //Ignore friction while button down.
             }
         }
 
         if (keyCode == KeyEvent.VK_S || keyCode == KeyEvent.VK_DOWN || keyCode == KeyEvent.VK_KP_DOWN)
         {
-            if (this.collider.getYSpeed() < controlSpeedChange) //Only if the player speed is less than the control speed.
+            if (!this.downKeyPressed) //Only if the key isn't already down.
             {
-                this.collider.setYSpeed(this.collider.getYSpeed() + controlSpeedChange);    //Bring the player speed up to the control speed.
+                this.downKeyPressed = true;
+                this.collider.setYSpeed(this.collider.getYSpeed() + controlAuthority);    //Add control speed to the player.
+                this.collider.setIgnoreFriction(true);  //Ignore friction while button down.
             }
         }
 
         if (keyCode == KeyEvent.VK_A || keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_KP_LEFT)
         {
-            if (this.collider.getXSpeed() > -controlSpeedChange)    //Only if the player speed is less than the control speed.
+            if (!this.leftKeyPressed) //Only if the key isn't already down.
             {
-                this.collider.setXSpeed(this.collider.getXSpeed() - controlSpeedChange);    //Bring the player speed up to the control speed.
+                this.leftKeyPressed = true;
+                this.collider.setXSpeed(this.collider.getXSpeed() - controlAuthority);    //Add control speed to the player.
+                this.collider.setIgnoreFriction(true);  //Ignore friction while button down.
             }
         }
 
         if (keyCode == KeyEvent.VK_D || keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_KP_RIGHT)
         {
-            if (this.collider.getXSpeed() < controlSpeedChange) //Only if the player speed is less than the control speed.
+            if (!this.rightKeyPressed) //Only if the key isn't already down.
             {
-                this.collider.setXSpeed(this.collider.getXSpeed() + controlSpeedChange);    //Bring the player speed up to the control speed.
+                this.rightKeyPressed = true;
+                this.collider.setXSpeed(this.collider.getXSpeed() + controlAuthority);    //Add control speed to the player.
+                this.collider.setIgnoreFriction(true);  //Ignore friction while button down.
             }
         }
     }
@@ -220,39 +231,45 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
     public void keyReleased(KeyEvent e)
     {
         int keyCode = e.getKeyCode();
-        float controlSpeedChange = 0.07f;
 
         if (keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_KP_UP)
         {
-            if (this.collider.getYSpeed() > -controlSpeedChange)
+            if (this.upKeyPressed)    //Only if the key is already down.
             {
-                this.collider.setYSpeed(this.collider.getYSpeed() - controlSpeedChange);
+                this.upKeyPressed = false;
+                this.collider.setYSpeed(0.0f);    //Stop the player.
+                this.collider.setIgnoreFriction(false);  //Stop ignoring friction.
             }
         }
 
         if (keyCode == KeyEvent.VK_S || keyCode == KeyEvent.VK_DOWN || keyCode == KeyEvent.VK_KP_DOWN)
         {
-            if (this.collider.getYSpeed() < controlSpeedChange)
+            if (this.downKeyPressed)    //Only if the key is already down.
             {
-                this.collider.setYSpeed(this.collider.getYSpeed() + controlSpeedChange);
+                this.downKeyPressed = false;
+                this.collider.setYSpeed(0.0f);    //Stop the player.
+                this.collider.setIgnoreFriction(false);  //Stop ignoring friction.
             }
         }
 
         if (keyCode == KeyEvent.VK_A || keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_KP_LEFT)
         {
-            if (this.collider.getXSpeed() > -controlSpeedChange)
+            if (this.leftKeyPressed)    //Only if the key is already down.
             {
-                this.collider.setXSpeed(this.collider.getXSpeed() - controlSpeedChange);
+                this.leftKeyPressed = false;
+                this.collider.setXSpeed(0.0f);    //Stop the player.
+                this.collider.setIgnoreFriction(false);  //Stop ignoring friction.
             }
         }
 
         if (keyCode == KeyEvent.VK_D || keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_KP_RIGHT)
         {
-            if (this.collider.getXSpeed() < controlSpeedChange)
+            if (this.rightKeyPressed)    //Only if the key is already down.
             {
-                this.collider.setXSpeed(this.collider.getXSpeed() + controlSpeedChange);
+                this.rightKeyPressed = false;
+                this.collider.setXSpeed(0.0f);    //Stop the player.
+                this.collider.setIgnoreFriction(false);  //Stop ignoring friction.
             }
         }
-    }
     }
 }

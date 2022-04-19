@@ -181,46 +181,46 @@ public class PhysicsEngine
     {
         if (collidingTopLeft)   //Top left corner only
         {
-            if (getXAxisGridOffset(collider) > getYAxisGridOffset(collider))    //If shorter distance to get out on y axis
+            if (getXAxisGridOffset(collider) > getYAxisGridOffset(collider))    //If shorter distance to get out on x axis
             {
-                moveColliderToGetAwayFromTile(collider, EDirection.down);
+                moveColliderToGetAwayFromTile(collider, EDirection.right);
             }
             else
             {
-                moveColliderToGetAwayFromTile(collider, EDirection.right);
+                moveColliderToGetAwayFromTile(collider, EDirection.down);
             }
         }
         else if (collidingTopRight) //Top right corner only
         {
-            if ((this.tileMap.getTileWidth() - getXAxisGridOffset(collider)) > getYAxisGridOffset(collider))    //If shorter distance to get out on y axis
+            if ((this.tileMap.getTileWidth() - getXAxisGridOffset(collider)) > getYAxisGridOffset(collider))    //If shorter distance to get out on x axis
             {
-                moveColliderToGetAwayFromTile(collider, EDirection.down);
+                moveColliderToGetAwayFromTile(collider, EDirection.left);
             }
             else
             {
-                moveColliderToGetAwayFromTile(collider, EDirection.left);
+                moveColliderToGetAwayFromTile(collider, EDirection.down);
             }
         }
         else if (collidingBottomLeft) //Bottom left corner only
         {
-            if (getXAxisGridOffset(collider) > (this.tileMap.getTileHeight() - getYAxisGridOffset(collider)))    //If shorter distance to get out on y axis
+            if (getXAxisGridOffset(collider) > (this.tileMap.getTileHeight() - getYAxisGridOffset(collider)))    //If shorter distance to get out on x axis
             {
-                moveColliderToGetAwayFromTile(collider, EDirection.up);
+                moveColliderToGetAwayFromTile(collider, EDirection.right);
             }
             else
             {
-                moveColliderToGetAwayFromTile(collider, EDirection.right);
+                moveColliderToGetAwayFromTile(collider, EDirection.up);
             }
         }
         else if (collidingBottomRight) //Bottom right corner only
         {
-            if ((this.tileMap.getTileWidth() - getXAxisGridOffset(collider)) > (this.tileMap.getTileHeight() - getYAxisGridOffset(collider)))    //If shorter distance to get out on y axis
+            if ((this.tileMap.getTileWidth() - getXAxisGridOffset(collider)) > (this.tileMap.getTileHeight() - getYAxisGridOffset(collider)))    //If shorter distance to get out on x axis
             {
-                moveColliderToGetAwayFromTile(collider, EDirection.up);
+                moveColliderToGetAwayFromTile(collider, EDirection.left);
             }
             else
             {
-                moveColliderToGetAwayFromTile(collider, EDirection.left);
+                moveColliderToGetAwayFromTile(collider, EDirection.up);
             }
         }
     }

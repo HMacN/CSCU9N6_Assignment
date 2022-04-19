@@ -146,6 +146,39 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
     @Override
     public void keyReleased(KeyEvent e)
     {
+        int keyCode = e.getKeyCode();
+        float controlSpeedChange = 0.07f;
 
+        if (keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_KP_UP)
+        {
+            if (this.collider.getYSpeed() > -controlSpeedChange)
+            {
+                this.collider.setYSpeed(this.collider.getYSpeed() - controlSpeedChange);
+            }
+        }
+
+        if (keyCode == KeyEvent.VK_S || keyCode == KeyEvent.VK_DOWN || keyCode == KeyEvent.VK_KP_DOWN)
+        {
+            if (this.collider.getYSpeed() < controlSpeedChange)
+            {
+                this.collider.setYSpeed(this.collider.getYSpeed() + controlSpeedChange);
+            }
+        }
+
+        if (keyCode == KeyEvent.VK_A || keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_KP_LEFT)
+        {
+            if (this.collider.getXSpeed() > -controlSpeedChange)
+            {
+                this.collider.setXSpeed(this.collider.getXSpeed() - controlSpeedChange);
+            }
+        }
+
+        if (keyCode == KeyEvent.VK_D || keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_KP_RIGHT)
+        {
+            if (this.collider.getXSpeed() < controlSpeedChange)
+            {
+                this.collider.setXSpeed(this.collider.getXSpeed() + controlSpeedChange);
+            }
+        }
     }
 }

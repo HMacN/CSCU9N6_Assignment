@@ -9,13 +9,13 @@ public class PhysicsEngine
 {
     private ArrayList<Collider> colliders;
     private TileMap tileMap;
-    private float xAxisGravityPerMilli = 0.000_5f;
-    private float yAxisGravityPerMilli = 0.000_5f;
-    private float frictionChangePerMilli = 0.000_2f;
+    private float xAxisGravityPerMilli = 0.000_0f;
+    private float yAxisGravityPerMilli = 0.000_0f;
+    private float frictionChangePerMilli = 0.000_4f;
     private float tileWidth;
     private float tileHeight;
     private float minimumSpeed = 0.01f;
-    private float speedLossDueToTileMapCollision = 0.9f;
+    private float speedLossDueToTileMapCollision = 0.5f;
 
     public PhysicsEngine(ArrayList<Collider> colliders)
     {
@@ -54,7 +54,6 @@ public class PhysicsEngine
             //resolve gravity and friction
             handleGravity(collider, xAxisGravitySpeedChange, yAxisGravitySpeedChange);
             handleFriction(collider, frictionChangeFactor);
-            //handleMinimumSpeed(collider, update);
         }
     }
 

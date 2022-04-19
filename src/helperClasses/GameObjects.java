@@ -2,10 +2,8 @@ package helperClasses;
 
 import CSCU9N6Library.TileMap;
 import physics.Collider;
-import physics.IPhysicsEntity;
 import physics.PhysicsEngine;
 import renderableObjects.IDrawable;
-import renderableObjects.Player;
 import soundsAndMusic.IGameSound;
 
 import java.awt.*;

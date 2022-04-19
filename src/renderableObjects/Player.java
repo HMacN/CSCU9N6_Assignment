@@ -1,6 +1,5 @@
 package renderableObjects;
 
-import CSCU9N6Library.Animation;
 import CSCU9N6Library.Sprite;
 import CSCU9N6Library.TileMap;
 import helperClasses.EntityUpdate;
@@ -8,13 +7,12 @@ import helperClasses.EntityUpdateFactory;
 import helperClasses.SpriteFactory;
 import helperClasses.UserInputHandler;
 import physics.Collider;
-import physics.IPhysicsEntity;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class Player implements IPhysicsEntity, IDrawable, KeyListener
+public class Player implements IDrawable, KeyListener
 {
     private Sprite movingSprite = SpriteFactory.getSpriteFromPNGFile("playerAnim", 1, 4, 60);
     private Sprite stillSprite = SpriteFactory.getSpriteFromPNGFile("player", 1, 1, 10_000);

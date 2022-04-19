@@ -41,6 +41,27 @@ public class LevelOneGameState implements IGameState
         this.gameObjects.addPhysicsEntity(this.player.getCollider());
 
         this.physicsEngine.setTileMap(this.tileMap);
+
+        spawnCargoCrates();
+    }
+
+    private void spawnCargoCrates()
+    {
+        for (int tileMapXCoord = 0; tileMapXCoord < this.tileMap.getMapWidth(); tileMapXCoord++)
+        {
+            for (int tileMapYCoord = 0; tileMapYCoord < this.tileMap.getMapHeight(); tileMapYCoord++)
+            {
+                if (this.tileMap.getTileChar(tileMapXCoord, tileMapYCoord) == 'c')
+                {
+                    spawnCargoCrate(tileMapXCoord * this.tileMap.getTileWidth(), tileMapYCoord * this.tileMap.getTileHeight());
+                }
+            }
+        }
+    }
+
+    private void spawnCargoCrate(float xCoord, float yCoord)
+    {
+        //TODO add cargo crate spawner
     }
 
     @Override

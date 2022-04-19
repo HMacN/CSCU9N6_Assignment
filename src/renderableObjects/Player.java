@@ -1,5 +1,6 @@
 package renderableObjects;
 
+import CSCU9N6Library.Animation;
 import CSCU9N6Library.Sprite;
 import CSCU9N6Library.TileMap;
 import helperClasses.EntityUpdate;
@@ -15,7 +16,9 @@ import java.awt.event.KeyListener;
 
 public class Player implements IPhysicsEntity, IDrawable, KeyListener
 {
-    private Sprite sprite = SpriteFactory.getSpriteFromPNGFile("player", 1, 4, 60);
+    private Sprite movingSprite = SpriteFactory.getSpriteFromPNGFile("playerAnim", 1, 4, 60);
+    private Sprite stillSprite = SpriteFactory.getSpriteFromPNGFile("player", 1, 1, 10_000);
+    private Sprite sprite = stillSprite;
     private Collider collider;
 
     private float minYCoord;
@@ -35,16 +38,20 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
     private boolean downKeyPressed = false;
     private boolean leftKeyPressed = false;
     private boolean rightKeyPressed = false;
-    private float controlAuthority = 0.07f;
+    private float controlAuthority = 0.1f;
 
     public Player(int screenWidth, int screenHeight, EntityUpdateFactory updateFactory, UserInputHandler inputHandler, TileMap tileMap)
     {
         this.startingX = screenWidth / 2.0f;
         this.startingY = screenHeight / 2.0f;
 
-        this.sprite.setX(this.startingX);
-        this.sprite.setY(this.startingY);
-        this.sprite.setScale(0.70f);
+        this.movingSprite.setX(this.startingX);
+        this.movingSprite.setY(this.startingY);
+        this.movingSprite.setScale(0.70f);
+
+        this.stillSprite.setX(this.startingX);
+        this.stillSprite.setY(this.startingY);
+        this.stillSprite.setScale(0.70f);
 
         this.collider = new Collider(this.startingX, this.startingY, 31.0f, 31.0f);
 
@@ -210,14 +217,19 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
         {
             if (!this.leftKeyPressed) //Only if the key isn't already down.
             {
+                sprite = movingSprite;
+
                 this.leftKeyPressed = true;
                 this.collider.setXSpeed(this.collider.getXSpeed() - controlAuthority);    //Add control speed to the player.
                 this.collider.setIgnoreFriction(true);  //Ignore friction while button down.
+                this.sprite.setScale(0.7f);
             }
         }
 
         if (keyCode == KeyEvent.VK_D || keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_KP_RIGHT)
         {
+            sprite = movingSprite;
+
             if (!this.rightKeyPressed) //Only if the key isn't already down.
             {
                 this.rightKeyPressed = true;
@@ -238,7 +250,7 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
             {
                 this.upKeyPressed = false;
                 this.collider.setYSpeed(0.0f);    //Stop the player.
-                this.collider.setIgnoreFriction(false);  //Stop ignoring friction.
+                stopIgnoringFrictionIfNoOtherButtonsPressed();
             }
         }
 
@@ -248,28 +260,42 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
             {
                 this.downKeyPressed = false;
                 this.collider.setYSpeed(0.0f);    //Stop the player.
-                this.collider.setIgnoreFriction(false);  //Stop ignoring friction.
+                stopIgnoringFrictionIfNoOtherButtonsPressed();
             }
         }
 
         if (keyCode == KeyEvent.VK_A || keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_KP_LEFT)
         {
+            sprite = stillSprite;
+
             if (this.leftKeyPressed)    //Only if the key is already down.
             {
                 this.leftKeyPressed = false;
                 this.collider.setXSpeed(0.0f);    //Stop the player.
-                this.collider.setIgnoreFriction(false);  //Stop ignoring friction.
+                stopIgnoringFrictionIfNoOtherButtonsPressed();
             }
         }
 
         if (keyCode == KeyEvent.VK_D || keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_KP_RIGHT)
         {
+            sprite = stillSprite;
+
             if (this.rightKeyPressed)    //Only if the key is already down.
             {
                 this.rightKeyPressed = false;
                 this.collider.setXSpeed(0.0f);    //Stop the player.
-                this.collider.setIgnoreFriction(false);  //Stop ignoring friction.
+                stopIgnoringFrictionIfNoOtherButtonsPressed();
             }
         }
+    }
+
+    private void stopIgnoringFrictionIfNoOtherButtonsPressed()
+    {
+        if (this.rightKeyPressed || this.leftKeyPressed || this.upKeyPressed || this.downKeyPressed)
+        {
+            return;
+        }
+
+        this.collider.setIgnoreFriction(false);
     }
 }

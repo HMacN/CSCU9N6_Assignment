@@ -87,11 +87,6 @@ public class PhysicsEngine
             return;
         }
         collider.setXSpeed(collider.getXSpeed() + xAxisGravityAcceleration);
-
-        if (collider.isIgnoringDownwardsGravity() && yAxisGravityAcceleration > 0)
-        {
-            return;
-        }
         collider.setYSpeed(collider.getYSpeed() + yAxisGravityAcceleration);
     }
 

@@ -103,16 +103,6 @@ public class Collider
         this.ignoringGravity = ignoringGravity;
     }
 
-    public boolean isIgnoringDownwardsGravity()
-    {
-        return ignoringDownwardsGravity;
-    }
-
-    public void setIgnoringDownwardsGravity(boolean ignoringDownwardsGravity)
-    {
-        this.ignoringDownwardsGravity = ignoringDownwardsGravity;
-    }
-
     public boolean isIgnoreFriction()
     {
         return ignoreFriction;

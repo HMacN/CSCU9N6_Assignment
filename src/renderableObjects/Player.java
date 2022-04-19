@@ -222,7 +222,7 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
                 this.leftKeyPressed = true;
                 this.collider.setXSpeed(this.collider.getXSpeed() - controlAuthority);    //Add control speed to the player.
                 this.collider.setIgnoreFriction(true);  //Ignore friction while button down.
-                this.sprite.setScale(0.7f);
+                this.sprite.setScale(-0.7f, 0.7f);
             }
         }
 
@@ -235,6 +235,7 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
                 this.rightKeyPressed = true;
                 this.collider.setXSpeed(this.collider.getXSpeed() + controlAuthority);    //Add control speed to the player.
                 this.collider.setIgnoreFriction(true);  //Ignore friction while button down.
+                this.sprite.setScale(0.7f, 0.7f);
             }
         }
     }

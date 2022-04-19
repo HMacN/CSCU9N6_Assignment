@@ -9,8 +9,8 @@ public class PhysicsEngine
 {
     private ArrayList<Collider> colliders;
     private TileMap tileMap;
-    private float xAxisGravityPerMilli = 0.000_0f;
-    private float yAxisGravityPerMilli = 0.000_0f;
+    private float xAxisGravityPerMilli = 0.000_1f;
+    private float yAxisGravityPerMilli = 0.000_1f;
     private float frictionChangePerMilli = 0.000_4f;
     private float tileWidth;
     private float tileHeight;
@@ -31,8 +31,6 @@ public class PhysicsEngine
 
     public void update(EntityUpdate update)
     {
-
-
         //Work out how much the speed should be reduced by.
         float frictionChangeFactor = this.frictionChangePerMilli * update.getMillisSinceLastUpdate();
 
@@ -79,7 +77,16 @@ public class PhysicsEngine
 
     private void handleGravity(Collider collider, float xAxisGravityAcceleration, float yAxisGravityAcceleration)
     {
+        if (collider.isIgnoringGravity())
+        {
+            return;
+        }
         collider.setXSpeed(collider.getXSpeed() + xAxisGravityAcceleration);
+
+        if (collider.isIgnoringDownwardsGravity() && yAxisGravityAcceleration > 0)
+        {
+            return;
+        }
         collider.setYSpeed(collider.getYSpeed() + yAxisGravityAcceleration);
     }
 
@@ -112,37 +119,151 @@ public class PhysicsEngine
         return;
     }
 
+    private int countCollidingCorners(boolean collidingTopLeft, boolean collidingTopRight,
+                                      boolean collidingBottomLeft, boolean collidingBottomRight)
+    {
+        int collidingCorners = 0;
+
+        if (collidingTopLeft)
+        {
+            collidingCorners++;
+        }
+
+        if (collidingTopRight)
+        {
+            collidingCorners++;
+        }
+
+        if (collidingBottomLeft)
+        {
+            collidingCorners++;
+        }
+
+        if (collidingBottomRight)
+        {
+            collidingCorners++;
+        }
+
+        return collidingCorners;
+    }
+
+    private void handleTwoCornerTileCollision(Collider collider, boolean collidingTopLeft, boolean collidingTopRight,
+                                              boolean collidingBottomLeft, boolean collidingBottomRight)
+    {
+        if (collidingTopLeft && collidingBottomLeft)    //Left face
+        {
+            moveColliderToGetAwayFromTile(collider, EDirection.right);
+        }
+
+        if (collidingTopRight && collidingBottomRight) //Right face
+        {
+            moveColliderToGetAwayFromTile(collider, EDirection.left);
+        }
+
+        if (collidingTopLeft && collidingTopRight)  //Top face
+        {
+            moveColliderToGetAwayFromTile(collider, EDirection.down);
+        }
+
+        if (collidingBottomLeft && collidingBottomRight)    //Bottom face
+        {
+            moveColliderToGetAwayFromTile(collider, EDirection.up);
+        }
+    }
+
+    private void handleOneCornerTileCollision(Collider collider, boolean collidingTopLeft, boolean collidingTopRight,
+                                              boolean collidingBottomLeft, boolean collidingBottomRight)
+    {
+        if (collidingTopLeft)   //Top left corner only
+        {
+            if (getXAxisGridOffset(collider) > getYAxisGridOffset(collider))    //If shorter distance to get out on y axis
+            {
+                moveColliderToGetAwayFromTile(collider, EDirection.down);
+            }
+            else
+            {
+                moveColliderToGetAwayFromTile(collider, EDirection.right);
+            }
+        }
+        else if (collidingTopRight) //Top right corner only
+        {
+            if ((this.tileMap.getTileWidth() - getXAxisGridOffset(collider)) > getYAxisGridOffset(collider))    //If shorter distance to get out on y axis
+            {
+                moveColliderToGetAwayFromTile(collider, EDirection.down);
+            }
+            else
+            {
+                moveColliderToGetAwayFromTile(collider, EDirection.left);
+            }
+        }
+        else if (collidingBottomLeft) //Bottom left corner only
+        {
+            if (getXAxisGridOffset(collider) > (this.tileMap.getTileHeight() - getYAxisGridOffset(collider)))    //If shorter distance to get out on y axis
+            {
+                moveColliderToGetAwayFromTile(collider, EDirection.up);
+            }
+            else
+            {
+                moveColliderToGetAwayFromTile(collider, EDirection.right);
+            }
+        }
+        else if (collidingBottomRight) //Bottom right corner only
+        {
+            if ((this.tileMap.getTileWidth() - getXAxisGridOffset(collider)) > (this.tileMap.getTileHeight() - getYAxisGridOffset(collider)))    //If shorter distance to get out on y axis
+            {
+                moveColliderToGetAwayFromTile(collider, EDirection.up);
+            }
+            else
+            {
+                moveColliderToGetAwayFromTile(collider, EDirection.left);
+            }
+        }
+    }
+
     private void handleTileMapCollisionForEntity(Collider collider,
                                                  boolean collidingTopLeft,
                                                  boolean collidingTopRight,
                                                  boolean collidingBottomLeft,
                                                  boolean collidingBottomRight)
     {
-        if (collidingTopLeft && collidingBottomLeft)    //Left face
+        //get colliding corner count
+        int collidingCorners = countCollidingCorners(collidingTopLeft, collidingTopRight, collidingBottomLeft, collidingBottomRight);
+
+        if (collidingCorners == 1)
         {
-            collider.setXSpeed(-collider.getXSpeed() * this.speedLossDueToTileMapCollision);  //Reverse the x-axis velocity.
-            collider.setXCoord(collider.getXCoord() + (this.tileMap.getTileWidth() - getXAxisGridOffset(collider)));  //Move the entity right out of the collision.
-            handleMinimumSpeed(collider);
+            handleOneCornerTileCollision(collider, collidingTopLeft, collidingTopRight, collidingBottomLeft, collidingBottomRight);
+        }
+        else if (collidingCorners > 1)
+        {
+            handleTwoCornerTileCollision(collider, collidingTopLeft, collidingTopRight, collidingBottomLeft, collidingBottomRight);
         }
 
-        if (collidingTopRight && collidingBottomRight)//Right face
-        {
-            collider.setXSpeed(-collider.getXSpeed() * this.speedLossDueToTileMapCollision);  //Reverse the x-axis velocity.
-            collider.setXCoord(collider.getXCoord() - getXAxisGridOffset(collider) + widthDiffBetweenEntitySizeAndTileSize(collider));  //Move the entity left out of the collision.
-            handleMinimumSpeed(collider);
-        }
+    }
 
-        if (collidingTopLeft && collidingTopRight)  //Top face
+    private void moveColliderToGetAwayFromTile(Collider collider, EDirection direction)
+    {
+        if (direction == EDirection.up)
         {
             collider.setYSpeed(-collider.getYSpeed() * this.speedLossDueToTileMapCollision);  //Reverse the y-axis velocity.
-            collider.setYCoord(collider.getYCoord() + (this.tileMap.getTileHeight() - getYAxisGridOffset(collider)));  //Move the entity down out of the collision.
+            collider.setYCoord(collider.getYCoord() - getYAxisGridOffset(collider) + heightDiffBetweenEntitySizeAndTileSize(collider));  //Move the collider up out of the collision.
             handleMinimumSpeed(collider);
         }
-
-        if (collidingBottomLeft && collidingBottomRight)    //Bottom face
+        else if (direction == EDirection.down)
         {
             collider.setYSpeed(-collider.getYSpeed() * this.speedLossDueToTileMapCollision);  //Reverse the y-axis velocity.
-            collider.setYCoord(collider.getYCoord() - getYAxisGridOffset(collider) + heightDiffBetweenEntitySizeAndTileSize(collider));  //Move the entity up out of the collision.
+            collider.setYCoord(collider.getYCoord() + (this.tileMap.getTileHeight() - getYAxisGridOffset(collider)));  //Move the collider down out of the collision.
+            handleMinimumSpeed(collider);
+        }
+        else if (direction == EDirection.left)
+        {
+            collider.setXSpeed(-collider.getXSpeed() * this.speedLossDueToTileMapCollision);  //Reverse the x-axis velocity.
+            collider.setXCoord(collider.getXCoord() - getXAxisGridOffset(collider) + widthDiffBetweenEntitySizeAndTileSize(collider));  //Move the collider left out of the collision.
+            handleMinimumSpeed(collider);
+        }
+        else if (direction == EDirection.right)
+        {
+            collider.setXSpeed(-collider.getXSpeed() * this.speedLossDueToTileMapCollision);  //Reverse the x-axis velocity.
+            collider.setXCoord(collider.getXCoord() + (this.tileMap.getTileWidth() - getXAxisGridOffset(collider)));  //Move the collider right out of the collision.
             handleMinimumSpeed(collider);
         }
     }
@@ -186,11 +307,19 @@ public class PhysicsEngine
         return false;
     }
 
-    public enum IFaceOfCollider
+    public enum EFaceOfCollider
     {
         topFace,
         bottomFace,
         leftFace,
         rightFace
+    }
+
+    private enum EDirection
+    {
+        up,
+        down,
+        left,
+        right
     }
 }

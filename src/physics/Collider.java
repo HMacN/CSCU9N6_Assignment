@@ -9,6 +9,8 @@ public class Collider
     private float width;
     private float height;
     private boolean selfDestruct = false;
+    private boolean ignoringGravity = false;
+    private boolean ignoringDownwardsGravity = false;
 
     public Collider(float xCoord, float yCoord, float width, float height)
     {
@@ -88,5 +90,25 @@ public class Collider
     public void setToSelfDestruct()
     {
         this.selfDestruct = true;
+    }
+
+    public boolean isIgnoringGravity()
+    {
+        return ignoringGravity;
+    }
+
+    public void setIgnoringGravity(boolean ignoringGravity)
+    {
+        this.ignoringGravity = ignoringGravity;
+    }
+
+    public boolean isIgnoringDownwardsGravity()
+    {
+        return ignoringDownwardsGravity;
+    }
+
+    public void setIgnoringDownwardsGravity(boolean ignoringDownwardsGravity)
+    {
+        this.ignoringDownwardsGravity = ignoringDownwardsGravity;
     }
 }

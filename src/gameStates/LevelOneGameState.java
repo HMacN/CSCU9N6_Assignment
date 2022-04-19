@@ -36,7 +36,7 @@ public class LevelOneGameState implements IGameState
         this.gameObjects.addTileMap(this.tileMap, this.spaceshipGame.getScreenWidth(), this.spaceshipGame.getScreenHeight());
 
         //Set up player.
-        this.player = new Player(this.spaceshipGame.getScreenWidth(), this.spaceshipGame.getScreenHeight(), this.updateFactory, this.spaceshipGame.getUserInputHandler());
+        this.player = new Player(this.spaceshipGame.getScreenWidth(), this.spaceshipGame.getScreenHeight(), this.updateFactory, this.spaceshipGame.getUserInputHandler(), this.tileMap);
         this.gameObjects.addDrawable(this.player, spaceShipLayer);
         this.gameObjects.addPhysicsEntity(this.player.getCollider());
 

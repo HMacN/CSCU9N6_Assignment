@@ -1,6 +1,7 @@
 package renderableObjects;
 
 import CSCU9N6Library.Sprite;
+import CSCU9N6Library.TileMap;
 import helperClasses.EntityUpdate;
 import helperClasses.EntityUpdateFactory;
 import helperClasses.SpriteFactory;
@@ -17,10 +18,6 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
     private Sprite sprite = SpriteFactory.getSpriteFromPNGFile("player", 1, 4, 60);
     private Collider collider;
 
-    private boolean restingOnTopFace = false;
-    private boolean restingOnBottomFace = false;
-    private boolean restingOnLeftFace = false;
-    private boolean restingOnRightFace = false;
     private float minYCoord;
     private float minXCoord;
     private float maxYCoord;
@@ -32,8 +29,9 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
 
     private EntityUpdateFactory updateFactory;
     private UserInputHandler inputHandler;
+    private TileMap tileMap;
 
-    public Player(int screenWidth, int screenHeight, EntityUpdateFactory updateFactory, UserInputHandler inputHandler)
+    public Player(int screenWidth, int screenHeight, EntityUpdateFactory updateFactory, UserInputHandler inputHandler, TileMap tileMap)
     {
         this.startingX = screenWidth / 2.0f;
         this.startingY = screenHeight / 2.0f;
@@ -52,6 +50,7 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
         this.updateFactory = updateFactory;
         this.inputHandler = inputHandler;
         this.inputHandler.addKeyListener(this);
+        this.tileMap = tileMap;
     }
 
     public Collider getCollider()
@@ -78,6 +77,47 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
 
         this.updateFactory.setPlayerXOffset(this.startingX - this.collider.getXCoord());
         this.updateFactory.setPlayerYOffset(this.startingY - this.collider.getYCoord());
+
+        workOutIfOnLadderAndSetColliderToIgnoreGravityIfSo();
+    }
+
+    private void workOutIfOnLadderAndSetColliderToIgnoreGravityIfSo()
+    {
+        if (isThisPointOnALadder(this.collider.getXCoord(), this.collider.getYCoord()) ||
+                isThisPointOnALadder(this.collider.getXCoord() + this.collider.getWidth(), this.collider.getYCoord()))
+        {
+            if (!this.collider.isIgnoringGravity())  //If not already on a ladder
+            {
+                //Set ignoring gravity, and stop movement as the player "grabs on"
+                this.collider.setIgnoringGravity(true);
+                this.collider.setXSpeed(0.0f);
+                this.collider.setYSpeed(0.0f);
+            }
+        }
+        else
+        {
+            this.collider.setIgnoringGravity(false);
+        }
+    }
+
+    private char tileMapChar(float xCoord, float yCoord)
+    {
+        int tileMapX = (int) xCoord / this.tileMap.getTileWidth();
+        int tileMapY = (int) yCoord / this.tileMap.getTileHeight();
+
+        System.out.println(this.tileMap.getTileChar(tileMapX, tileMapY));
+
+        return this.tileMap.getTileChar(tileMapX, tileMapY);
+    }
+
+    private boolean isThisPointOnALadder(float xCoord, float yCoord)
+    {
+        if (tileMapChar(xCoord, yCoord) == 'l')
+        {
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -140,7 +180,40 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
     @Override
     public void keyPressed(KeyEvent e)
     {
+        int keyCode = e.getKeyCode();
+        float controlSpeedChange = 0.07f;
 
+        if (keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_KP_UP)
+        {
+            if (this.collider.getYSpeed() > -controlSpeedChange)    //Only if the player speed is less than the control speed.
+            {
+                this.collider.setYSpeed(this.collider.getYSpeed() - controlSpeedChange);    //Bring the player speed up to the control speed.
+            }
+        }
+
+        if (keyCode == KeyEvent.VK_S || keyCode == KeyEvent.VK_DOWN || keyCode == KeyEvent.VK_KP_DOWN)
+        {
+            if (this.collider.getYSpeed() < controlSpeedChange) //Only if the player speed is less than the control speed.
+            {
+                this.collider.setYSpeed(this.collider.getYSpeed() + controlSpeedChange);    //Bring the player speed up to the control speed.
+            }
+        }
+
+        if (keyCode == KeyEvent.VK_A || keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_KP_LEFT)
+        {
+            if (this.collider.getXSpeed() > -controlSpeedChange)    //Only if the player speed is less than the control speed.
+            {
+                this.collider.setXSpeed(this.collider.getXSpeed() - controlSpeedChange);    //Bring the player speed up to the control speed.
+            }
+        }
+
+        if (keyCode == KeyEvent.VK_D || keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_KP_RIGHT)
+        {
+            if (this.collider.getXSpeed() < controlSpeedChange) //Only if the player speed is less than the control speed.
+            {
+                this.collider.setXSpeed(this.collider.getXSpeed() + controlSpeedChange);    //Bring the player speed up to the control speed.
+            }
+        }
     }
 
     @Override
@@ -180,5 +253,6 @@ public class Player implements IPhysicsEntity, IDrawable, KeyListener
                 this.collider.setXSpeed(this.collider.getXSpeed() + controlSpeedChange);
             }
         }
+    }
     }
 }

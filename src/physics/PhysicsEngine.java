@@ -1,6 +1,7 @@
 package physics;
 
 import CSCU9N6Library.TileMap;
+import helperClasses.Debug;
 import helperClasses.EntityUpdate;
 import helperClasses.TilemapHelper;
 
@@ -103,7 +104,6 @@ public class PhysicsEngine
         }
     }
 
-    //TODO make these functions return distances, then choose the smallest and move the collider.
     private float findDistanceToMoveVerticallyToEscapeCollision(Collider collider, Collider otherCollider)
     {
         //Work out which is further up.
@@ -112,14 +112,14 @@ public class PhysicsEngine
 
         if (positionDifference < 0) //If collider is further up than otherCollider
         {
-            distanceToMove = -(positionDifference + collider.getHeight());
+            distanceToMove = -1 * (positionDifference + collider.getHeight());
         }
         else   //If the collider is further down than otherCollider
         {
             distanceToMove = otherCollider.getHeight() - positionDifference;
         }
 
-        return distanceToMove + 1;  //Add an extra pixel to gel clear of weird effects.
+        return distanceToMove;
     }
 
     private float findDistanceToMoveHorizontallyToEscapeCollision(Collider collider, Collider otherCollider)
@@ -130,14 +130,14 @@ public class PhysicsEngine
 
         if (positionDifference < 0) //If collider is further left than otherCollider
         {
-            distanceToMove = -(positionDifference + collider.getWidth());
+            distanceToMove = -1 * (positionDifference + collider.getWidth());
         }
         else   //If the collider is further right than otherCollider
         {
             distanceToMove = otherCollider.getWidth() - positionDifference;
         }
 
-        return distanceToMove + 1;  //Add an extra pixel to gel clear of weird effects.
+        return distanceToMove;
     }
 
     private void processImpulseTransferBetweenColliders(Collider collider, Collider otherCollider)

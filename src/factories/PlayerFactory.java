@@ -1,10 +1,10 @@
 package factories;
 
-import helperClasses.GameObjects;
+import spaceShipGame.GameObjects;
 import renderableObjects.Player;
 import spaceShipGame.SpaceshipGame;
 
-import static helperClasses.GameObjects.ERenderLayer.spaceShipLayer;
+import static spaceShipGame.GameObjects.ERenderLayer.spaceShipLayer;
 
 public class PlayerFactory implements IGameObjectFactory
 {

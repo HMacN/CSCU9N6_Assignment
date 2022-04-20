@@ -20,7 +20,7 @@ public class CargoCrate implements IDrawable
     {
         this.sprite = SpriteFactory.getSpriteFromPNGFile("crate");
         this.sprite.show();
-        this.collider = new Collider(xCoord, yCoord, 31.0f, 31.0f);
+        this.collider = new Collider(xCoord, yCoord, 31.0f, 31.0f, 5.0f);
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
     }

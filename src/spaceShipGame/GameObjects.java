@@ -1,6 +1,7 @@
-package helperClasses;
+package spaceShipGame;
 
 import CSCU9N6Library.TileMap;
+import helperClasses.EntityUpdate;
 import physics.Collider;
 import physics.PhysicsEngine;
 import renderableObjects.IDrawable;
@@ -63,8 +64,6 @@ public class GameObjects
 
     public void addDrawable(IDrawable drawable, ERenderLayer layer)
     {
-
-
         switch (layer)
         {
             case UILayer: this.UILayer.add(drawable); break;
@@ -104,7 +103,6 @@ public class GameObjects
             {
                 entity.draw(graphics2D, 0.0f, 0.0f);
             }
-
         }
     }
 
@@ -193,6 +191,7 @@ public class GameObjects
         layer.removeAll(entitiesToDelete);
     }
 
+    //TODO change this to a flag to be acted on.
     public void clearForeground(float spaceShipXSpeed, float spaceShipYSpeed)
     {
         this.colliders.clear();

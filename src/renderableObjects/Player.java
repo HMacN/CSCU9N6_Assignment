@@ -50,7 +50,7 @@ public class Player implements IDrawable, KeyListener
         this.stillSprite.setY(this.startingY);
         this.stillSprite.setScale(0.70f);
 
-        this.collider = new Collider(xCoord, yCoord, 31.0f, 31.0f);
+        this.collider = new Collider(xCoord, yCoord, 31.0f, 31.0f, 1.0f);
 
         this.updateFactory = updateFactory;
         this.inputHandler = inputHandler;

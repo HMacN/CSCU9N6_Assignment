@@ -1,6 +1,6 @@
 package factories;
 
-import helperClasses.GameObjects;
+import spaceShipGame.GameObjects;
 import renderableObjects.CargoCrate;
 import spaceShipGame.SpaceshipGame;
 

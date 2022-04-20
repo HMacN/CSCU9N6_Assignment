@@ -9,9 +9,10 @@ import CSCU9N6Library.Animation;
 import CSCU9N6Library.Sprite;
 import renderableObjects.GameButton;
 import soundsAndMusic.MIDIPlayer;
+import spaceShipGame.GameObjects;
 import spaceShipGame.SpaceshipGame;
 
-import static helperClasses.GameObjects.ERenderLayer.*;
+import static spaceShipGame.GameObjects.ERenderLayer.*;
 
 
 public class MainMenuState implements IGameState
@@ -26,6 +27,7 @@ public class MainMenuState implements IGameState
     private GameButton levelOneButton;
     private GameButton levelTwoButton;
     private GameButton levelThreeButton;
+    private boolean firstEvent = false;
 
     private long millisInState = 0;
 
@@ -44,16 +46,6 @@ public class MainMenuState implements IGameState
 
         //Set up the menu.
         this.gameObjects.addDrawable(getLaunchPad(), spaceStationLayer);
-
-        this.levelOneButton = getLevel1Button();
-        //TODO Other buttons.
-        //this.levelTwoButton = getLevel1Button();
-        //this.levelThreeButton = getLevel1Button();
-
-        this.gameObjects.addDrawable(this.levelOneButton, UILayer);
-        //TODO Other buttons.
-        //this.gameObjects.addDrawable(this.levelTwoButton, UILayer);
-        //this.gameObjects.addDrawable(this.levelThreeButton, UILayer);
 
 
         //Start playing background music.
@@ -109,10 +101,24 @@ public class MainMenuState implements IGameState
 
     private void performUpdates()
     {
-        if (this.millisInState > 4_000)
+        if (this.millisInState > 4_000 && !this.firstEvent)
         {
+            firstEvent = true;
+
             this.updateFactory.setSpaceshipXSpeed(0.0f);
             this.updateFactory.setSpaceshipYSpeed(-0.1f);
+
+            //Now that the game has had a little time, it should be safe to add the buttons.
+            this.levelOneButton = getLevel1Button();
+            //TODO Other buttons.
+            //this.levelTwoButton = getLevel1Button();
+            //this.levelThreeButton = getLevel1Button();
+
+            this.gameObjects.addDrawable(this.levelOneButton, UILayer);
+            //TODO Other buttons.
+            //this.gameObjects.addDrawable(this.levelTwoButton, UILayer);
+            //this.gameObjects.addDrawable(this.levelThreeButton, UILayer);
+
         }
     }
 

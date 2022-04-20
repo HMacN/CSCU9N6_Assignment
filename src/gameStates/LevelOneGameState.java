@@ -5,7 +5,7 @@ import factories.CargoCrateFactory;
 import factories.PlayerFactory;
 import helperClasses.EntityUpdate;
 import factories.EntityUpdateFactory;
-import helperClasses.GameObjects;
+import spaceShipGame.GameObjects;
 import helperClasses.StarFieldGenerator;
 import helperClasses.TilemapHelper;
 import physics.PhysicsEngine;
@@ -14,7 +14,7 @@ import spaceShipGame.SpaceshipGame;
 
 import java.util.LinkedList;
 
-import static helperClasses.GameObjects.ERenderLayer.*;
+import static spaceShipGame.GameObjects.ERenderLayer.*;
 import static helperClasses.TilemapHelper.ETileType.*;
 
 public class LevelOneGameState implements IGameState

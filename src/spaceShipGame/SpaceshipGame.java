@@ -1,7 +1,6 @@
 package spaceShipGame;
 
 import factories.EntityUpdateFactory;
-import helperClasses.GameObjects;
 import CSCU9N6Library.GameCore;
 import gameStates.IGameState;
 import gameStates.MainMenuState;

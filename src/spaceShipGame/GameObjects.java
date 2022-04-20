@@ -161,10 +161,6 @@ public class GameObjects
             {
                 collidersToDelete.add(collider);
             }
-            else
-            {
-                collider.update(update.getMillisSinceLastUpdate());
-            }
         }
 
         colliders.removeAll(collidersToDelete);

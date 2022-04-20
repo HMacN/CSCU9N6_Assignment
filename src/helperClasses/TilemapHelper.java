@@ -5,8 +5,9 @@ import factories.IGameObjectFactory;
 
 public class TilemapHelper
 {
-    public static char tileMapChar(float xCoord, float yCoord, TileMap tileMap)
+    public static char tileMapCharFromGameCoordinates(float xCoord, float yCoord, TileMap tileMap)
     {
+        //Work out tile from coordinates given.
         int tileMapX = (int) xCoord / tileMap.getTileWidth();
         int tileMapY = (int) yCoord / tileMap.getTileHeight();
 
@@ -15,7 +16,7 @@ public class TilemapHelper
 
     public static boolean isThisPointOnALadder(float xCoord, float yCoord, TileMap tileMap)
     {
-        if (tileMapChar(xCoord, yCoord, tileMap) == 'l')    //If 'l', it's a ladder.
+        if (tileMapCharFromGameCoordinates(xCoord, yCoord, tileMap) == ETileType.ladder.tileType)
         {
             return true;
         }
@@ -23,9 +24,9 @@ public class TilemapHelper
         return false;
     }
 
-    public static boolean detectTileMapCollisionAtPoint(float xCoord, float yCoord, TileMap tileMap)
+    public static boolean isThisPointOnAHullTile(float xCoord, float yCoord, TileMap tileMap)
     {
-        if (tileMapChar(xCoord, yCoord, tileMap) == ETileType.hull.tileType) // If it's an 'X', it's a collision.
+        if (tileMapCharFromGameCoordinates(xCoord, yCoord, tileMap) == ETileType.hull.tileType)
         {
             return true;
         }
@@ -47,11 +48,23 @@ public class TilemapHelper
         }
     }
 
+    public static boolean isThisPointOnAGravityLift(float xCoord, float yCoord, TileMap tileMap)
+    {
+        if (tileMapCharFromGameCoordinates(xCoord, yCoord, tileMap) == ETileType.gravLift.tileType)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     public enum ETileType
     {
         player('p'),
         cargoCrate('c'),
-        hull('X')
+        hull('X'),
+        ladder('l'),
+        gravLift('^')
         ;
 
         private final char tileType;

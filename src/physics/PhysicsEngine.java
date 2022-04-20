@@ -1,7 +1,6 @@
 package physics;
 
 import CSCU9N6Library.TileMap;
-import helperClasses.Debug;
 import helperClasses.EntityUpdate;
 import helperClasses.TilemapHelper;
 
@@ -9,19 +8,18 @@ import java.util.ArrayList;
 
 public class PhysicsEngine
 {
-    private ArrayList<Collider> allColliders;
-    private ArrayList<Collider> possiblyCollidingColliders = new ArrayList<>();
+    private ArrayList<Collider> colliders;
     private TileMap tileMap;
     private float xAxisGravityPerMilli = 0.000_0f;
     private float yAxisGravityPerMilli = 0.000_1f;
     private float frictionChangePerMilli = 0.000_4f;
     private float minimumSpeed = 0.01f;
-    private float speedLossDueToTileMapCollision = 0.5f;
+    private float speedLossDueToTileMapCollision = 0.3f;
     private float constantOfElasticity = 0.9f;
 
     public PhysicsEngine(ArrayList<Collider> colliders)
     {
-        this.allColliders = colliders;
+        this.colliders = colliders;
     }
 
     public void setTileMap(TileMap tileMap)
@@ -31,9 +29,6 @@ public class PhysicsEngine
 
     public void update(EntityUpdate update)
     {
-        //Clear list of possibly colliding colliders.
-        this.possiblyCollidingColliders = new ArrayList<>();
-
         //Work out how much the speed should be reduced by.
         float frictionChangeFactor = this.frictionChangePerMilli * update.getMillisSinceLastUpdate();
 
@@ -41,19 +36,35 @@ public class PhysicsEngine
         float xAxisGravitySpeedChange = this.xAxisGravityPerMilli * update.getMillisSinceLastUpdate();
         float yAxisGravitySpeedChange = this.yAxisGravityPerMilli * update.getMillisSinceLastUpdate();
 
-        for (Collider collider : allColliders)
+        for (Collider collider : colliders)
         {
+            //Move the colliders according to their speed.
+            collider.setXCoord(collider.getXCoord() + collider.getXSpeed() * update.getMillisSinceLastUpdate());
+            collider.setYCoord(collider.getYCoord() + collider.getYSpeed() * update.getMillisSinceLastUpdate());
+
+            //Handle all collisions.
             checkForAndHandleTilemapCollisions(collider);
             checkForAndHandleColliderCollisions(collider);
 
+            //Handle environmental effects.
             handleGravity(collider, xAxisGravitySpeedChange, yAxisGravitySpeedChange);
             handleFriction(collider, frictionChangeFactor);
+
+            //Now move colliders based on their control input.
+            //collider.setXCoord(collider.getXCoord() + collider.getXControlSpeed() * update.getMillisSinceLastUpdate());
+            //collider.setYCoord(collider.getYCoord() + collider.getYControlSpeed() * update.getMillisSinceLastUpdate());
         }
     }
 
     private void checkForAndHandleColliderCollisions(Collider collider)
     {
-        for (Collider otherCollider : this.allColliders)
+        //No colliders have had their collisions handled.
+        for (Collider unhandledCollider : this.colliders)
+        {
+            unhandledCollider.setCollisionsHandled(false);
+        }
+
+        for (Collider otherCollider : this.colliders)
         {
             //Check that the other collider has not already been handled.
             if (otherCollider.collisionsAlreadyHandled())
@@ -80,27 +91,31 @@ public class PhysicsEngine
             }
 
             //The two colliders must be overlapping to have got this far.
+            stopColliderOverlapsAndHandleImpulseTransfer(collider, otherCollider);
 
-            processImpulseTransferBetweenColliders(collider, otherCollider);
-            ensureCollidersAreNotOverlapping(collider, otherCollider);
+            //No other colliders should be able to collide with this one during this update.
+            collider.setCollisionsHandled(true);
         }
-
-        //No other colliders should be able to collide with this one during this update.
-        collider.setCollisionsHandled();
     }
 
-    private void ensureCollidersAreNotOverlapping(Collider collider, Collider otherCollider)
+    private void stopColliderOverlapsAndHandleImpulseTransfer(Collider collider, Collider otherCollider)
     {
         float horizontalDistance = findDistanceToMoveHorizontallyToEscapeCollision(collider, otherCollider);
         float verticalDistance = findDistanceToMoveVerticallyToEscapeCollision(collider, otherCollider);
 
         if (Math.abs(horizontalDistance) < Math.abs(verticalDistance))  //If the horizontal distance is shorter
         {
+            //Move collider horizontally.
             collider.setXCoord(collider.getXCoord() + horizontalDistance);
+            //Only handle horizontal impulse.
+            processHorizontalImpulseTransfer(collider, otherCollider);
         }
         else
         {
+            //Move collider vertically.
             collider.setYCoord(collider.getYCoord() + verticalDistance);
+            //Only handle vertical impulse.
+            processVerticalImpulseTransfer(collider, otherCollider);
         }
     }
 
@@ -140,31 +155,58 @@ public class PhysicsEngine
         return distanceToMove;
     }
 
-    private void processImpulseTransferBetweenColliders(Collider collider, Collider otherCollider)
+    private void processVerticalImpulseTransfer(Collider collider, Collider otherCollider)
     {
-        //Calculate differences in speeds.
-        float horizontalRelativeSpeed = collider.getXSpeed() - otherCollider.getXSpeed();   //Signage: collider is hitting otherCollider
+        //Calculate difference in speeds.
         float verticalRelativeSpeed = collider.getYSpeed() - otherCollider.getYSpeed();     //Signage: collider is hitting otherCollider
 
-        //Calculate impulses.
-        float horizontalImpulse = (1 + constantOfElasticity) * (horizontalRelativeSpeed) / (collider.getInverseMass() + otherCollider.getInverseMass());
+        //Calculate impulse.
         float verticalImpulse = (1 + constantOfElasticity) * (verticalRelativeSpeed) / (collider.getInverseMass() + otherCollider.getInverseMass());
 
-        //Calculate horizontal speed changes.
-        float colliderHorizontalSpeedChange = -horizontalImpulse * collider.getInverseMass();   //Negative due to signage: collider is losing impulse from hitting something.
-        float otherColliderHorizontalSpeedChange = horizontalImpulse * otherCollider.getInverseMass();  //Positive due to signage: otherCollider is gaining impulse form being hit.
 
         //Calculate vertical speed changes.
         float colliderVerticalSpeedChange = -verticalImpulse * collider.getInverseMass();   //Negative due to signage: collider is losing impulse from hitting something.
         float otherColliderVerticalSpeedChange = verticalImpulse * otherCollider.getInverseMass();  //Positive due to signage: otherCollider is gaining impulse form being hit.
 
-        //Apply horizontal speed changes.
-        collider.setXSpeed(collider.getXSpeed() + colliderHorizontalSpeedChange);
-        otherCollider.setXSpeed(otherCollider.getXSpeed() + otherColliderHorizontalSpeedChange);
+        //If speed changes are too small, discard them.
+        colliderVerticalSpeedChange = discardSmallSpeedChange(0.001f, colliderVerticalSpeedChange);
+        otherColliderVerticalSpeedChange = discardSmallSpeedChange(0.001f, otherColliderVerticalSpeedChange);
+
 
         //Apply vertical speed changes.
         collider.setYSpeed(collider.getYSpeed() + colliderVerticalSpeedChange);
         otherCollider.setYSpeed(otherCollider.getYSpeed() + otherColliderVerticalSpeedChange);
+    }
+
+    private void processHorizontalImpulseTransfer(Collider collider, Collider otherCollider)
+    {
+        //Calculate difference in speeds.
+        float horizontalRelativeSpeed = collider.getXSpeed() - otherCollider.getXSpeed();   //Signage: collider is hitting otherCollider
+
+        //Calculate impulse.
+        float horizontalImpulse = (1 + constantOfElasticity) * (horizontalRelativeSpeed) / (collider.getInverseMass() + otherCollider.getInverseMass());
+
+        //Calculate horizontal speed changes.
+        float colliderHorizontalSpeedChange = -horizontalImpulse * collider.getInverseMass();   //Negative due to signage: collider is losing impulse from hitting something.
+        float otherColliderHorizontalSpeedChange = horizontalImpulse * otherCollider.getInverseMass();  //Positive due to signage: otherCollider is gaining impulse form being hit.
+
+        //If speed changes are too small, discard them.
+        colliderHorizontalSpeedChange = discardSmallSpeedChange(0.001f, colliderHorizontalSpeedChange);
+        otherColliderHorizontalSpeedChange = discardSmallSpeedChange(0.001f, otherColliderHorizontalSpeedChange);
+
+        //Apply horizontal speed changes.
+        collider.setXSpeed(collider.getXSpeed() + colliderHorizontalSpeedChange);
+        otherCollider.setXSpeed(otherCollider.getXSpeed() + otherColliderHorizontalSpeedChange);
+    }
+
+    private float discardSmallSpeedChange(float minimumSpeed, float speed)
+    {
+        if (speed < minimumSpeed && speed > -minimumSpeed)
+        {
+            speed = 0.0f;
+        }
+
+        return speed;
     }
 
     private boolean verticalDistanceBetweenCentroidsIsGreaterThanCombinedHalfHeights(Collider collider, Collider otherCollider)
@@ -226,6 +268,13 @@ public class PhysicsEngine
         }
         collider.setXSpeed(collider.getXSpeed() + xAxisGravityAcceleration);
         collider.setYSpeed(collider.getYSpeed() + yAxisGravityAcceleration);
+
+        //Handle gravity lifts.
+        if (TilemapHelper.isThisPointOnAGravityLift(collider.getXAxisCentroid(), collider.getYAxisCentroid(), this.tileMap))
+        {
+            //If it's on a lift, cancel out the normal vertical gravity, and make it fall gently upwards.
+            collider.setYSpeed(collider.getYSpeed() - yAxisGravityAcceleration - 0.000_1f);
+        }
     }
 
     public void setGravity(float xAxisGravityPerMilli, float yAxisGravityPerMilli)
@@ -243,10 +292,10 @@ public class PhysicsEngine
         float bottomEdge = collider.getYCoord() + collider.getHeight();
 
         //Check if there is a collision with the tile map.
-        boolean collidingTopLeft = TilemapHelper.detectTileMapCollisionAtPoint(leftEdge, topEdge, tileMap);
-        boolean collidingTopRight = TilemapHelper.detectTileMapCollisionAtPoint(rightEdge, topEdge, tileMap);
-        boolean collidingBottomLeft = TilemapHelper.detectTileMapCollisionAtPoint(leftEdge, bottomEdge, tileMap);
-        boolean collidingBottomRight = TilemapHelper.detectTileMapCollisionAtPoint(rightEdge, bottomEdge, tileMap);
+        boolean collidingTopLeft = TilemapHelper.isThisPointOnAHullTile(leftEdge, topEdge, tileMap);
+        boolean collidingTopRight = TilemapHelper.isThisPointOnAHullTile(rightEdge, topEdge, tileMap);
+        boolean collidingBottomLeft = TilemapHelper.isThisPointOnAHullTile(leftEdge, bottomEdge, tileMap);
+        boolean collidingBottomRight = TilemapHelper.isThisPointOnAHullTile(rightEdge, bottomEdge, tileMap);
 
         //If there is a collision, handle it, otherwise return.
         if (collidingTopLeft || collidingTopRight || collidingBottomLeft || collidingBottomRight)

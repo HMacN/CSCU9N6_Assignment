@@ -82,8 +82,7 @@ public class Player implements IDrawable, KeyListener
 
     private void workOutIfOnLadderAndSetColliderToIgnoreGravityIfSo()
     {
-        if (TilemapHelper.isThisPointOnALadder(this.collider.getXCoord(), this.collider.getYCoord(), this.tileMap) ||
-                TilemapHelper.isThisPointOnALadder(this.collider.getXCoord() + this.collider.getWidth(), this.collider.getYCoord(), this.tileMap))
+        if (TilemapHelper.isThisPointOnALadder(this.collider.getXAxisCentroid(), this.collider.getYAxisCentroid(), this.tileMap))
         {
             if (!this.collider.isIgnoringGravity())  //If not already on a ladder
             {

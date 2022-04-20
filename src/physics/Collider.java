@@ -30,13 +30,6 @@ public class Collider
         calculateHalfSizes();
     }
 
-    public void update(long elapsedTimeInMillis)
-    {
-        this.collisionsAlreadyHandled = false;
-        this.xCoord += this.xSpeed * elapsedTimeInMillis;
-        this.yCoord += this.ySpeed * elapsedTimeInMillis;
-    }
-
     public void setXCoord(float xCoord)
     {
         this.xCoord = xCoord;
@@ -148,9 +141,9 @@ public class Collider
         return collisionsAlreadyHandled;
     }
 
-    public void setCollisionsHandled()
+    public void setCollisionsHandled(boolean collisionsHandled)
     {
-        this.collisionsAlreadyHandled = true;
+        this.collisionsAlreadyHandled = collisionsHandled;
     }
 
     public float getInverseMass()

@@ -174,7 +174,7 @@ public class GameObjects
         for (IDrawable backgroundEntity : layer)
         {
             //Delete background entities that have travelled off screen.
-            if (backgroundEntity.getSelfDestructStatus())
+            if (backgroundEntity.getSelfDestructWhenOffScreen())
             {
                 entitiesToDelete.add(backgroundEntity);
             }
@@ -187,10 +187,12 @@ public class GameObjects
         layer.removeAll(entitiesToDelete);
     }
 
-    //TODO change this to a flag to be acted on.
     public void clearForeground(float spaceShipXSpeed, float spaceShipYSpeed)
     {
-        this.colliders.clear();
+        for (Collider collider : this.colliders)
+        {
+            collider.setToSelfDestruct();
+        }
 
         for (IDrawable drawable : this.UILayer)
         {

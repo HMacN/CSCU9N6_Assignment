@@ -52,19 +52,19 @@ public class CargoCrate implements IDrawable
     }
 
     @Override
-    public boolean getSelfDestructStatus()
+    public boolean getSelfDestructWhenOffScreen()
     {
         if (!this.selfDestructWhenOffScreen)
         {
             return false;   //Don't self destruct without being told to do so.
         }
 
-        if (this.sprite.getX() > this.screenWidth || this.sprite.getX() < this.sprite.getWidth())   //If the sprite has gone off the sides of the screen.
+        if (this.sprite.getX() > this.screenWidth || this.sprite.getX() < -this.sprite.getWidth())   //If the sprite has gone off the sides of the screen.
         {
             return true;
         }
 
-        if (this.sprite.getY() > this.screenHeight || this.sprite.getY() < this.sprite.getHeight()) //If the sprite has gone off the top or bottom of the screen.
+        if (this.sprite.getY() > this.screenHeight || this.sprite.getY() < -this.sprite.getHeight()) //If the sprite has gone off the top or bottom of the screen.
         {
             return true;
         }
@@ -78,7 +78,7 @@ public class CargoCrate implements IDrawable
         return collider;
     }
 
-    public void selfDestructWhenOffScreen()
+    public void setSelfDestructWhenOffScreen()
     {
         this.selfDestructWhenOffScreen = true;
     }

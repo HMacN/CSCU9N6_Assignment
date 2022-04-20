@@ -110,25 +110,25 @@ public class Player implements IDrawable, KeyListener
         this.sprite.setVelocityY(ySpeed);
     }
 
-    public void selfDestructWhenOffScreen()
+    public void setSelfDestructWhenOffScreen()
     {
         this.selfDestructWhenOffScreen = true;
     }
 
     @Override
-    public boolean getSelfDestructStatus()
+    public boolean getSelfDestructWhenOffScreen()
     {
         if (!this.selfDestructWhenOffScreen)
         {
             return false;   //Don't self destruct without being told to do so.
         }
 
-        if (this.sprite.getX() > this.screenWidth || this.sprite.getX() < this.sprite.getWidth())   //If the sprite has gone off the sides of the screen.
+        if (this.sprite.getX() > this.screenWidth || this.sprite.getX() < -this.sprite.getWidth())   //If the sprite has gone off the sides of the screen.
         {
             return true;
         }
 
-        if (this.sprite.getY() > this.screenHeight || this.sprite.getY() < this.sprite.getHeight()) //If the sprite has gone off the top or bottom of the screen.
+        if (this.sprite.getY() > this.screenHeight || this.sprite.getY() < -this.sprite.getHeight()) //If the sprite has gone off the top or bottom of the screen.
         {
             return true;
         }
@@ -153,8 +153,7 @@ public class Player implements IDrawable, KeyListener
             if (!this.upKeyPressed)    //Only if the key isn't already down.
             {
                 this.upKeyPressed = true;
-                this.collider.setYSpeed(this.collider.getYSpeed() - this.controlAuthority);    //Add control speed to the player.
-                this.collider.setIgnoreFriction(true);  //Ignore friction while button down.
+                this.collider.setYControlSpeed(-this.controlAuthority);    //Add control speed to the player.
             }
         }
 
@@ -163,8 +162,7 @@ public class Player implements IDrawable, KeyListener
             if (!this.downKeyPressed) //Only if the key isn't already down.
             {
                 this.downKeyPressed = true;
-                this.collider.setYSpeed(this.collider.getYSpeed() + controlAuthority);    //Add control speed to the player.
-                this.collider.setIgnoreFriction(true);  //Ignore friction while button down.
+                this.collider.setYControlSpeed(this.controlAuthority);    //Add control speed to the player.
             }
         }
 
@@ -175,8 +173,7 @@ public class Player implements IDrawable, KeyListener
                 sprite = movingSprite;
 
                 this.leftKeyPressed = true;
-                this.collider.setXSpeed(this.collider.getXSpeed() - controlAuthority);    //Add control speed to the player.
-                this.collider.setIgnoreFriction(true);  //Ignore friction while button down.
+                this.collider.setXControlSpeed(-this.controlAuthority);    //Add control speed to the player.
                 this.sprite.setScale(-0.7f, 0.7f);
             }
         }
@@ -188,8 +185,7 @@ public class Player implements IDrawable, KeyListener
             if (!this.rightKeyPressed) //Only if the key isn't already down.
             {
                 this.rightKeyPressed = true;
-                this.collider.setXSpeed(this.collider.getXSpeed() + controlAuthority);    //Add control speed to the player.
-                this.collider.setIgnoreFriction(true);  //Ignore friction while button down.
+                this.collider.setXControlSpeed(this.controlAuthority);    //Add control speed to the player.
                 this.sprite.setScale(0.7f, 0.7f);
             }
         }
@@ -205,8 +201,7 @@ public class Player implements IDrawable, KeyListener
             if (this.upKeyPressed)    //Only if the key is already down.
             {
                 this.upKeyPressed = false;
-                this.collider.setYSpeed(0.0f);    //Stop the player.
-                stopIgnoringFrictionIfNoOtherButtonsPressed();
+                this.collider.setYControlSpeed(0.0f);    //Stop the player.
             }
         }
 
@@ -215,8 +210,7 @@ public class Player implements IDrawable, KeyListener
             if (this.downKeyPressed)    //Only if the key is already down.
             {
                 this.downKeyPressed = false;
-                this.collider.setYSpeed(0.0f);    //Stop the player.
-                stopIgnoringFrictionIfNoOtherButtonsPressed();
+                this.collider.setYControlSpeed(0.0f);    //Stop the player.
             }
         }
 
@@ -227,8 +221,7 @@ public class Player implements IDrawable, KeyListener
             if (this.leftKeyPressed)    //Only if the key is already down.
             {
                 this.leftKeyPressed = false;
-                this.collider.setXSpeed(0.0f);    //Stop the player.
-                stopIgnoringFrictionIfNoOtherButtonsPressed();
+                this.collider.setXControlSpeed(0.0f);    //Stop the player.
             }
         }
 
@@ -239,8 +232,7 @@ public class Player implements IDrawable, KeyListener
             if (this.rightKeyPressed)    //Only if the key is already down.
             {
                 this.rightKeyPressed = false;
-                this.collider.setXSpeed(0.0f);    //Stop the player.
-                stopIgnoringFrictionIfNoOtherButtonsPressed();
+                this.collider.setXControlSpeed(0.0f);    //Stop the player.
             }
         }
     }
@@ -258,15 +250,5 @@ public class Player implements IDrawable, KeyListener
         }
 
         this.collider.setXSpeed(0.0f);  //Stop player moving horizontally.
-    }
-
-    private void stopIgnoringFrictionIfNoOtherButtonsPressed()
-    {
-        if (this.rightKeyPressed || this.leftKeyPressed || this.upKeyPressed || this.downKeyPressed)
-        {
-            return;
-        }
-
-        this.collider.setIgnoreFriction(false);
     }
 }

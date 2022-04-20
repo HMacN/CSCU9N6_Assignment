@@ -10,17 +10,15 @@ public class BackgroundEntity implements IDrawable
 
 	private Sprite sprite;
 	private float parallax = 1.0f;
-	private boolean selfDestructStatus = false;
+	private boolean selfDestructWhenOffScreen = false;
 
-	private int maxXCoord;
-	private int minXCoord = 0;
-	private int maxYCoord;
-	private int minYCoord = 0;
+	private float screenWidth;
+	private int screenHeight;
 
 	public BackgroundEntity(int screenWidth, int screenHeight)
 	{
-		this.maxXCoord = screenWidth;
-		this.maxYCoord = screenHeight;
+		this.screenWidth = screenWidth;
+		this.screenHeight = screenHeight;
 	}
 
 	public void draw(Graphics2D graphics2D, float xOffset, float yOffset)
@@ -41,14 +39,6 @@ public class BackgroundEntity implements IDrawable
 		this.sprite = sprite;
 	}
 
-	public void setSelfDestructBoundaries(int maxXCoord, int minXCoord, int maxYCoord, int minYCoord)
-	{
-		this.maxXCoord = maxXCoord;
-		this.minXCoord = minXCoord;
-		this.maxYCoord = maxYCoord;
-		this.minYCoord = minYCoord;
-	}
-
 	/**
 	 * 
 	 * @param entityUpdate
@@ -59,8 +49,6 @@ public class BackgroundEntity implements IDrawable
 		this.setYSpeed(-entityUpdate.getSpaceshipYSpeed() * this.parallax);
 
 		this.sprite.update(entityUpdate.getMillisSinceLastUpdate());
-
-		updateSelfDestructStatus();
 	}
 
 	/**
@@ -102,19 +90,29 @@ public class BackgroundEntity implements IDrawable
 		this.sprite.setY(yCoord);
 	}
 
-	public boolean getSelfDestructStatus()
+	public boolean getSelfDestructWhenOffScreen()
 	{
-		return this.selfDestructStatus;
+		if (!this.selfDestructWhenOffScreen)
+		{
+			return false;   //Don't self destruct without being told to do so.
+		}
+
+		if (this.sprite.getX() > this.screenWidth || this.sprite.getX() < -this.sprite.getWidth())   //If the sprite has gone off the sides of the screen.
+		{
+			return true;
+		}
+
+		if (this.sprite.getY() > this.screenHeight || this.sprite.getY() < -this.sprite.getHeight()) //If the sprite has gone off the top or bottom of the screen.
+		{
+			return true;
+		}
+
+		//If the sprite is due for destruction, but is still in view:
+		return false;
 	}
 
-	private void updateSelfDestructStatus()
+	public void setSelfDestructWhenOffScreen()
 	{
-		if (this.sprite.getY() < this.minYCoord
-				|| this.sprite.getY() > this.maxYCoord
-				|| this.sprite.getX() < this.minXCoord
-				|| this.sprite.getX() > this.maxXCoord )
-		{
-			this.selfDestructStatus = true;
-		}
+		this.selfDestructWhenOffScreen = true;
 	}
 }

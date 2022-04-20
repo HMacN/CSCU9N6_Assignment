@@ -15,5 +15,7 @@ public interface IDrawable
 
 	void setYSpeed(float ySpeed);
 
-	boolean getSelfDestructStatus();
+	boolean getSelfDestructWhenOffScreen();
+
+	void setSelfDestructWhenOffScreen();
 }

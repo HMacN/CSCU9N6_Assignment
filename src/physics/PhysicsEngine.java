@@ -11,7 +11,7 @@ public class PhysicsEngine
     private ArrayList<Collider> colliders;
     private TileMap tileMap;
     private float xAxisGravityPerMilli = 0.000_0f;
-    private float yAxisGravityPerMilli = 0.000_1f;
+    private float yAxisGravityPerMilli = 0.000_3f;
     private float frictionChangePerMilli = 0.000_4f;
     private float minimumSpeed = 0.01f;
     private float speedLossDueToTileMapCollision = 0.3f;
@@ -51,8 +51,8 @@ public class PhysicsEngine
             handleFriction(collider, frictionChangeFactor);
 
             //Now move colliders based on their control input.
-            //collider.setXCoord(collider.getXCoord() + collider.getXControlSpeed() * update.getMillisSinceLastUpdate());
-            //collider.setYCoord(collider.getYCoord() + collider.getYControlSpeed() * update.getMillisSinceLastUpdate());
+            collider.setXCoord(collider.getXCoord() + collider.getXControlSpeed() * update.getMillisSinceLastUpdate());
+            collider.setYCoord(collider.getYCoord() + collider.getYControlSpeed() * update.getMillisSinceLastUpdate());
         }
     }
 
@@ -250,11 +250,6 @@ public class PhysicsEngine
 
     private void handleFriction(Collider collider, float frictionChangeFactor)
     {
-        if (collider.isIgnoreFriction())
-        {
-            return;
-        }
-
         //Apply an amount of friction so that objects come to a stop.
         collider.setYSpeed(collider.getYSpeed() * (1 - frictionChangeFactor));
         collider.setXSpeed(collider.getXSpeed() * (1 - frictionChangeFactor));
@@ -272,8 +267,8 @@ public class PhysicsEngine
         //Handle gravity lifts.
         if (TilemapHelper.isThisPointOnAGravityLift(collider.getXAxisCentroid(), collider.getYAxisCentroid(), this.tileMap))
         {
-            //If it's on a lift, cancel out the normal vertical gravity, and make it fall gently upwards.
-            collider.setYSpeed(collider.getYSpeed() - yAxisGravityAcceleration - 0.000_1f);
+            //If it's on a lift, cancel out the normal vertical gravity, and make it fall upwards.
+            collider.setYSpeed(collider.getYSpeed() - yAxisGravityAcceleration - 0.001f);
         }
     }
 

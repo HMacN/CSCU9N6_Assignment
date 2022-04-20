@@ -1,42 +1,34 @@
 package renderableObjects;
 
 import CSCU9N6Library.Sprite;
-import helperClasses.Debug;
 import helperClasses.EntityUpdate;
 import helperClasses.IButtonFunctionObject;
 import helperClasses.UserInputHandler;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 public class GameButton implements IDrawable, MouseListener
 {
-    private Sprite pressedSprite;
-    private Sprite unPressedSprite;
+    private final Sprite pressedSprite;
+    private final float screenWidth;
+    private final float screenHeight;
+    private final Sprite unPressedSprite;
     private Sprite sprite;
-    private boolean selfDestructStatus = false;
-    private UserInputHandler inputHandler;
-    private IButtonFunctionObject buttonFunctionObject;
-
-    private int maxXCoord;
-    private int minXCoord;
-    private int maxYCoord;
-    private int minYCoord;
+    private boolean selfDestructWhenOffScreen = false;
+    private final UserInputHandler inputHandler;
+    private final IButtonFunctionObject buttonFunctionObject;
 
     private int clickBoundaryTop;
     private int clickBoundaryBottom;
     private int clickBoundaryLeft;
     private int clickBoundaryRight;
 
-    public GameButton(int screenWidth, int screenHeight, Sprite unPressedSprite, Sprite pressedSprite, UserInputHandler inputHandler, IButtonFunctionObject functionObject)
+    public GameButton(float screenWidth, float screenHeight, Sprite unPressedSprite, Sprite pressedSprite, UserInputHandler inputHandler, IButtonFunctionObject functionObject)
     {
-        this.maxXCoord = screenWidth;
-        this.minXCoord = -screenWidth;
-        this.maxYCoord = screenHeight;
-        this.minYCoord = -screenHeight;
-
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
         this.unPressedSprite = unPressedSprite;
         this.pressedSprite = pressedSprite;
         this.sprite = this.unPressedSprite;
@@ -63,14 +55,6 @@ public class GameButton implements IDrawable, MouseListener
         this.sprite.draw(graphics2D);
     }
 
-    public void setSelfDestructBoundaries(int maxXCoord, int minXCoord, int maxYCoord, int minYCoord)
-    {
-        this.maxXCoord = maxXCoord;
-        this.minXCoord = minXCoord;
-        this.maxYCoord = maxYCoord;
-        this.minYCoord = minYCoord;
-    }
-
     /**
      * @param entityUpdate
      */
@@ -79,8 +63,6 @@ public class GameButton implements IDrawable, MouseListener
         this.sprite.update(entityUpdate.getMillisSinceLastUpdate());
 
         setUpClickBoundaries();
-
-        updateSelfDestructStatus();
     }
 
     /**
@@ -125,20 +107,30 @@ public class GameButton implements IDrawable, MouseListener
         this.unPressedSprite.setY(yCoord);
     }
 
-    public boolean getSelfDestructStatus()
+    public boolean getSelfDestructWhenOffScreen()
     {
-        return this.selfDestructStatus;
+        if (!this.selfDestructWhenOffScreen)
+        {
+            return false;   //Don't self destruct without being told to do so.
+        }
+
+        if (this.sprite.getX() > this.screenWidth || this.sprite.getX() < -this.sprite.getWidth())   //If the sprite has gone off the sides of the screen.
+        {
+            return true;
+        }
+
+        if (this.sprite.getY() > this.screenHeight || this.sprite.getY() < -this.sprite.getHeight()) //If the sprite has gone off the top or bottom of the screen.
+        {
+            return true;
+        }
+
+        //If the sprite is due for destruction, but is still in view:
+        return false;
     }
 
-    private void updateSelfDestructStatus()
+    public void setSelfDestructWhenOffScreen()
     {
-        if (this.sprite.getY() < this.minYCoord
-                || this.sprite.getY() > this.maxYCoord
-                || this.sprite.getX() < this.minXCoord
-                || this.sprite.getX() > this.maxXCoord)
-        {
-            this.selfDestructStatus = true;
-        }
+        this.selfDestructWhenOffScreen = true;
     }
 
     @Override

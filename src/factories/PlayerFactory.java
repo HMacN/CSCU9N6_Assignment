@@ -46,7 +46,7 @@ public class PlayerFactory implements IGameObjectFactory
     {
         if (this.player != null)    //Avoid null pointer exceptions!
         {
-            this.player.selfDestructWhenOffScreen();    //Set the object to disappear when off screen.
+            this.player.setSelfDestructWhenOffScreen();    //Set the object to disappear when off screen.
             this.player = null; //Delete the player reference.
         }
     }

@@ -6,6 +6,8 @@ public class Collider
     private float yCoord;
     private float xSpeed = 0.0f;
     private float ySpeed = 0.0f;
+    private float xControlSpeed = 0.0f;
+    private float yControlSpeed = 0.0f;
 
     private float width;
     private float height;
@@ -15,7 +17,6 @@ public class Collider
 
     private boolean selfDestruct = false;
     private boolean ignoringGravity = false;
-    private boolean ignoreFriction = false;
     private boolean collisionsAlreadyHandled = false;
 
     public Collider(float xCoord, float yCoord, float width, float height, float mass)
@@ -100,16 +101,6 @@ public class Collider
         this.ignoringGravity = ignoringGravity;
     }
 
-    public boolean isIgnoreFriction()
-    {
-        return ignoreFriction;
-    }
-
-    public void setIgnoreFriction(boolean ignoreFriction)
-    {
-        this.ignoreFriction = ignoreFriction;
-    }
-
     public float getYAxisCentroid()
     {
         return this.yCoord + this.halfHeight;
@@ -149,5 +140,25 @@ public class Collider
     public float getInverseMass()
     {
         return inverseMass;
+    }
+
+    public float getXControlSpeed()
+    {
+        return xControlSpeed;
+    }
+
+    public void setXControlSpeed(float xControlSpeed)
+    {
+        this.xControlSpeed = xControlSpeed;
+    }
+
+    public float getYControlSpeed()
+    {
+        return yControlSpeed;
+    }
+
+    public void setYControlSpeed(float yControlSpeed)
+    {
+        this.yControlSpeed = yControlSpeed;
     }
 }

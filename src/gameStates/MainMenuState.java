@@ -47,6 +47,15 @@ public class MainMenuState implements IGameState
         //Set up the menu.
         this.gameObjects.addDrawable(getLaunchPad(), spaceStationLayer);
 
+        this.levelOneButton = getLevel1Button();
+        //TODO Other buttons.
+        //this.levelTwoButton = getLevel1Button();
+        //this.levelThreeButton = getLevel1Button();
+
+        this.gameObjects.addDrawable(this.levelOneButton, UILayer);
+        //TODO Other buttons.
+        //this.gameObjects.addDrawable(this.levelTwoButton, UILayer);
+        //this.gameObjects.addDrawable(this.levelThreeButton, UILayer);
 
         //Start playing background music.
         this.backgroundMusic = new MIDIPlayer("sounds/theme.mid");
@@ -79,11 +88,6 @@ public class MainMenuState implements IGameState
         Sprite sprite =  new Sprite(animation);
 
         launchPad.setSprite(sprite);
-        launchPad.setSelfDestructBoundaries(
-                SCREEN_WIDTH,
-                -SCREEN_WIDTH,
-                SCREEN_HEIGHT,
-                -SCREEN_HEIGHT);
 
         return launchPad;
     }
@@ -107,18 +111,6 @@ public class MainMenuState implements IGameState
 
             this.updateFactory.setSpaceshipXSpeed(0.0f);
             this.updateFactory.setSpaceshipYSpeed(-0.1f);
-
-            //Now that the game has had a little time, it should be safe to add the buttons.
-            this.levelOneButton = getLevel1Button();
-            //TODO Other buttons.
-            //this.levelTwoButton = getLevel1Button();
-            //this.levelThreeButton = getLevel1Button();
-
-            this.gameObjects.addDrawable(this.levelOneButton, UILayer);
-            //TODO Other buttons.
-            //this.gameObjects.addDrawable(this.levelTwoButton, UILayer);
-            //this.gameObjects.addDrawable(this.levelThreeButton, UILayer);
-
         }
     }
 

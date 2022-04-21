@@ -66,6 +66,7 @@ public class Player implements IDrawable, KeyListener
     @Override
     public void draw(Graphics2D graphics2D, float xOffset, float yOffset)
     {
+        //Draw the sprite.
         this.sprite.drawTransformed(graphics2D);
     }
 
@@ -74,8 +75,12 @@ public class Player implements IDrawable, KeyListener
     {
         this.sprite.update(entityUpdate.getMillisSinceLastUpdate());
 
-        this.updateFactory.setPlayerXOffset(this.startingX - this.collider.getXCoord());
-        this.updateFactory.setPlayerYOffset(this.startingY - this.collider.getYCoord());
+        //Only change the offset when not self destructing, so that this sprite will leave the screen if it is due to destruct.
+        if (!this.selfDestructWhenOffScreen)
+        {
+            this.updateFactory.setPlayerXOffset(this.startingX - this.collider.getXCoord());
+            this.updateFactory.setPlayerYOffset(this.startingY - this.collider.getYCoord());
+        }
 
         workOutIfOnLadderAndSetColliderToIgnoreGravityIfSo();
     }

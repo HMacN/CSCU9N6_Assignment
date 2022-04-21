@@ -5,19 +5,20 @@ import factories.CargoCrateFactory;
 import factories.PlayerFactory;
 import helperClasses.EntityUpdate;
 import factories.EntityUpdateFactory;
+import levelEvents.*;
 import spaceShipGame.GameObjects;
 import helperClasses.StarFieldGenerator;
-import helperClasses.TilemapHelper;
 import physics.PhysicsEngine;
-import renderableObjects.IDrawable;
 import spaceShipGame.SpaceshipGame;
 
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.LinkedList;
 
 import static spaceShipGame.GameObjects.ERenderLayer.*;
 import static helperClasses.TilemapHelper.ETileType.*;
 
-public class LevelOneGameState implements IGameState
+public class LevelOneGameState implements IGameState, KeyListener
 {
     private SpaceshipGame spaceshipGame;
     private EntityUpdateFactory updateFactory;
@@ -28,11 +29,13 @@ public class LevelOneGameState implements IGameState
     private PlayerFactory playerFactory;
     private CargoCrateFactory crateFactory;
     private PhysicsEngine physicsEngine;
-    private LinkedList<IDrawable> thingsToDeleteAtTheEnd = new LinkedList<>();
 
-    private long timeInState = 0;
+    private long millisInState = 0;
     private long levelProgressInMillis = 0;
     private boolean paused = false;
+
+    private LinkedList<ILevelEvent> levelEvents = new LinkedList<>();
+    private LinkedList<ILevelEvent> levelEventsToAdd = new LinkedList<>();
 
     public LevelOneGameState(SpaceshipGame spaceshipGame)
     {
@@ -42,15 +45,13 @@ public class LevelOneGameState implements IGameState
         this.physicsEngine = this.spaceshipGame.getPhysics();
 
         this.tileMap.loadMap("maps", "SpaceShipOne.txt");
-        this.gameObjects.addTileMap(this.tileMap, this.spaceshipGame.getScreenWidth(), this.spaceshipGame.getScreenHeight());
         this.physicsEngine.setTileMap(this.tileMap);
 
         this.playerFactory = new PlayerFactory(this.spaceshipGame, this.gameObjects);
         this.crateFactory = new CargoCrateFactory(this.spaceshipGame, this.gameObjects);
-        //this.cargoCrateFactory = new CargoCrateFactory();
 
-        TilemapHelper.spawnEntityOnMap(player, this.tileMap, this.playerFactory);
-        TilemapHelper.spawnEntityOnMap(cargoCrate, this.tileMap, this.crateFactory);
+        addLevelEvents();
+        this.spaceshipGame.getUserInputHandler().addKeyListener(this);
     }
 
     @Override
@@ -60,9 +61,9 @@ public class LevelOneGameState implements IGameState
         {
             this.levelProgressInMillis = this.levelProgressInMillis + millisSinceLastUpdate;
         }
-        this.timeInState = this.timeInState + millisSinceLastUpdate;
+        this.millisInState = this.millisInState + millisSinceLastUpdate;
 
-        performUpdates();
+        handleLevelEvents();
 
         this.updateFactory.setMillisSinceLastUpdate(millisSinceLastUpdate);
         EntityUpdate update = this.updateFactory.getEntityUpdate();
@@ -74,8 +75,79 @@ public class LevelOneGameState implements IGameState
         return update;
     }
 
-    private void performUpdates()
+    @Override
+    public void addLevelEvent(ILevelEvent event, long millisUntilEventTriggers)
+    {
+        event.setNewTargetTime(this.millisInState + millisUntilEventTriggers);  //Add the current time to the countdown timer.
+        this.levelEventsToAdd.add(event);
+    }
+
+    private void addLevelEvents()
+    {
+        //Get set up.
+        addLevelEvent(new ShipManoeuvre(0.0f, -0.1f, this.updateFactory), 0);
+        addLevelEvent(new DisplayTileMap(this.tileMap, this.gameObjects, this.spaceshipGame.getScreenWidth(), this.spaceshipGame.getScreenHeight()), 0);
+        addLevelEvent(new SpawnGameObjects(player, this.tileMap, this.playerFactory), 0);
+        addLevelEvent(new SpawnGameObjects(cargoCrate, this.tileMap, this.crateFactory), 0);
+
+        //Accelerate
+        addLevelEvent(new ShipManoeuvre(-0.5f, 0.0f, this.updateFactory), 6_000);
+        addLevelEvent(new GravityShift(0.000_5f, -0.000_1f, this.physicsEngine), 6_000);
+
+        //Start cruising
+        addLevelEvent(new ShipManoeuvre(-0.15f, 0.0f, this.updateFactory), 10_000);
+        addLevelEvent(new GravityShift(0.0f, 0.000_5f, this.physicsEngine), 10_000);
+
+        //End the level
+        addLevelEvent(new PrepareToEndLevel(this.spaceshipGame, EGameState.mainMenu), 30_000);
+    }
+
+    private void handleLevelEvents()
+    {
+        LinkedList<ILevelEvent> eventsToDelete = new LinkedList<>();
+
+        //Do it this bloody stupid way because otherwise Java throws a concurrentModificationException.
+        this.levelEvents.addAll(this.levelEventsToAdd);
+
+        for (ILevelEvent event : this.levelEvents)
+        {
+            if (event.isReadyToSelfDestruct())
+            {
+                eventsToDelete.add(event);
+            }
+            else
+            {
+                event.setCurrentTime(this.millisInState);
+            }
+        }
+
+        this.levelEvents.removeAll(eventsToDelete);
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e)
     {
 
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e)
+    {
+
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e)
+    {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER)
+        {
+            //If the enter key is clicked, clear all events and return to the main menu.
+            for (ILevelEvent event : this.levelEvents)
+            {
+                event.cancel();
+            }
+
+            addLevelEvent(new PrepareToEndLevel(this.spaceshipGame, EGameState.mainMenu), 0);
+        }
     }
 }

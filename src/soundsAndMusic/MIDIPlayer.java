@@ -55,7 +55,7 @@ public class MIDIPlayer extends Thread implements IGameSound
             sequencer.setSequence(score);
             sequencer.setTickPosition(this.startingTick);
             sequencer.start();
-            while (sequencer.isRunning())
+            while (sequencer.isRunning() && !this.finished)
             {
                 Thread.sleep(100);
             }
@@ -79,5 +79,11 @@ public class MIDIPlayer extends Thread implements IGameSound
     public void play()
     {
         this.start();
+    }
+
+    @Override
+    public void finishPlaying()
+    {
+        this.finished = true;
     }
 }

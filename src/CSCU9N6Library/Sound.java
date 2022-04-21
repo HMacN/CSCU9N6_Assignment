@@ -52,7 +52,7 @@ public class Sound extends Thread implements IGameSound
             clip.open(this.stream);
             clip.start();
             Thread.sleep(100);
-            while (clip.isRunning())
+            while (clip.isRunning() && !this.finished)
             {
                 Thread.sleep(100);
             }
@@ -85,6 +85,12 @@ public class Sound extends Thread implements IGameSound
     public void play()
     {
         this.start();
+    }
+
+    @Override
+    public void finishPlaying()
+    {
+        this.finished = true;
     }
 
     private class AdjustableFilterInputStream extends FilterInputStream

@@ -24,6 +24,7 @@ public class GameButton implements IDrawable, MouseListener
     private int clickBoundaryBottom;
     private int clickBoundaryLeft;
     private int clickBoundaryRight;
+    private boolean visible = false;
 
     public GameButton(float screenWidth, float screenHeight, Sprite unPressedSprite, Sprite pressedSprite, UserInputHandler inputHandler, IButtonFunctionObject functionObject)
     {
@@ -37,7 +38,7 @@ public class GameButton implements IDrawable, MouseListener
         this.inputHandler = inputHandler;
         inputHandler.addMouseListener(this);
 
-        setUpClickBoundaries();
+        //setUpClickBoundaries();
     }
 
     private void setUpClickBoundaries()
@@ -53,6 +54,7 @@ public class GameButton implements IDrawable, MouseListener
     public void draw(Graphics2D graphics2D, float xOffset, float yOffset)
     {
         this.sprite.draw(graphics2D);
+        this.visible = this.sprite.isVisible();
     }
 
     /**
@@ -62,7 +64,7 @@ public class GameButton implements IDrawable, MouseListener
     {
         this.sprite.update(entityUpdate.getMillisSinceLastUpdate());
 
-        setUpClickBoundaries();
+        //setUpClickBoundaries();
     }
 
     /**
@@ -136,6 +138,14 @@ public class GameButton implements IDrawable, MouseListener
     @Override
     public void mouseClicked(MouseEvent e)
     {
+        //Do nothing if the button is not displayed.
+        if (!this.visible)
+        {
+            return;
+        }
+
+        setUpClickBoundaries();
+
         if (e.getX() < this.clickBoundaryRight
                 && e.getX() > this.clickBoundaryLeft
                 && e.getY() > this.clickBoundaryTop

@@ -8,14 +8,12 @@ import java.awt.*;
 public class BackgroundEntity implements IDrawable
 {
 
+	private final float screenWidth;
+	private final float screenHeight;
 	private Sprite sprite;
 	private float parallax = 1.0f;
-	private boolean selfDestructWhenOffScreen = false;
 
-	private float screenWidth;
-	private int screenHeight;
-
-	public BackgroundEntity(int screenWidth, int screenHeight)
+	public BackgroundEntity(float screenWidth, float screenHeight)
 	{
 		this.screenWidth = screenWidth;
 		this.screenHeight = screenHeight;
@@ -23,11 +21,11 @@ public class BackgroundEntity implements IDrawable
 
 	public void draw(Graphics2D graphics2D, float xOffset, float yOffset)
 	{
-		this.sprite.setX(this.sprite.getX() + xOffset);
-		this.sprite.setY(this.sprite.getY() + yOffset);
+		//this.sprite.setX(this.sprite.getX() + xOffset);
+		//this.sprite.setY(this.sprite.getY() + yOffset);
 		this.sprite.draw(graphics2D);
-		this.sprite.setX(this.sprite.getX() - xOffset);
-		this.sprite.setY(this.sprite.getY() - yOffset);
+		//this.sprite.setX(this.sprite.getX() - xOffset);
+		//this.sprite.setY(this.sprite.getY() - yOffset);
 	}
 
 	/**
@@ -92,27 +90,22 @@ public class BackgroundEntity implements IDrawable
 
 	public boolean getSelfDestructWhenOffScreen()
 	{
-		if (!this.selfDestructWhenOffScreen)
+		//Note that the negative of the screen width is used here instead of the negative of the sprite width due to sprite.getWidth() not working.
+
+		if (this.sprite.getX() < this.screenWidth && this.sprite.getX() > (-1 * this.screenWidth))   //If the sprite is still likely to get rendered.
 		{
-			return false;   //Don't self destruct without being told to do so.
+			if (this.sprite.getY() < this.screenHeight && this.sprite.getY() > (-1 * this.screenHeight)) //If the sprite is still likely to get rendered.
+			{
+				return false;
+			}
 		}
 
-		if (this.sprite.getX() > this.screenWidth || this.sprite.getX() < -this.sprite.getWidth())   //If the sprite has gone off the sides of the screen.
-		{
-			return true;
-		}
-
-		if (this.sprite.getY() > this.screenHeight || this.sprite.getY() < -this.sprite.getHeight()) //If the sprite has gone off the top or bottom of the screen.
-		{
-			return true;
-		}
-
-		//If the sprite is due for destruction, but is still in view:
-		return false;
+		//If the sprite has gone off the screen:
+		return true;
 	}
 
 	public void setSelfDestructWhenOffScreen()
 	{
-		this.selfDestructWhenOffScreen = true;
+		//Do nothing - background entities should always disappear when off screen.
 	}
 }

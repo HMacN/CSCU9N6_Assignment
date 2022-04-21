@@ -26,10 +26,13 @@ public class GameObjects
     private PhysicsEngine physicsEngine;
 
     private TileMap tileMap;
+    private float tileMapXSpeed = 0.0f;
+    private float tileMapYSpeed = 0.0f;
+    private float tileMapXLocation = 0.0f;
+    private float tileMapYLocation = 0.0f;
+
     private float playerXOffset = 0.0f;
     private float playerYOffset = 0.0f;
-    private int screenWidth;
-    private int screenHeight;
 
     public void addSound(IGameSound sound)
     {
@@ -42,11 +45,24 @@ public class GameObjects
         this.physicsEngine = engine;
     }
 
-    public void addTileMap(TileMap tileMap, int screenWidth, int screenHeight)
+    public void addTileMap(TileMap tileMap)
     {
         this.tileMap = tileMap;
-        this.screenWidth = screenWidth;
-        this.screenHeight = screenHeight;
+        this.tileMapXLocation = 0.0f;
+        this.tileMapYLocation = 0.0f;
+        this.tileMapXSpeed = 0.0f;
+        this.tileMapYSpeed = 0.0f;
+    }
+
+    private void resolveTileMapSpeeds(long elapsedTimeInMillis)
+    {
+        this.tileMapXLocation = this.tileMapXLocation + (elapsedTimeInMillis * this.tileMapXSpeed);
+        this.tileMapYLocation = this.tileMapYLocation + (elapsedTimeInMillis * this.tileMapYSpeed);
+    }
+
+    public void removeTileMap()
+    {
+        this.tileMap = null;
     }
 
     public void addPhysicsEntity(Collider collider)
@@ -84,7 +100,10 @@ public class GameObjects
 
         if (this.tileMap != null)
         {
-            this.tileMap.draw(graphics2D, (int) this.playerXOffset, (int) this.playerYOffset);
+            this.tileMap.draw(
+                    graphics2D,
+                    (int) (this.playerXOffset + this.tileMapXLocation),
+                    (int) (this.playerYOffset + this.tileMapYLocation));
         }
 
         drawLayer(this.spaceShipLayer, graphics2D, true);
@@ -110,6 +129,8 @@ public class GameObjects
     {
         this.playerXOffset = updateData.getPlayerXOffset();
         this.playerYOffset = updateData.getPlayerYOffset();
+
+        resolveTileMapSpeeds(updateData.getMillisSinceLastUpdate());
 
         //If there is a physics engine set, and there are physics entities, then do physics updates:
         if (this.physicsEngine != null && this.colliders.size() > 0)
@@ -168,6 +189,14 @@ public class GameObjects
         physicsEngine.update(update);
     }
 
+    public void clearPhysicsObjects()
+    {
+        for (Collider collider : this.colliders)
+        {
+            collider.setToSelfDestruct();
+        }
+    }
+
     private void updateGraphicsLayer(ArrayList<IDrawable> layer, EntityUpdate update)
     {
         LinkedList<IDrawable> entitiesToDelete = new LinkedList<>();
@@ -189,27 +218,44 @@ public class GameObjects
 
     public void clearForeground(float spaceShipXSpeed, float spaceShipYSpeed)
     {
-        for (Collider collider : this.colliders)
-        {
-            collider.setToSelfDestruct();
-        }
+        clearPhysicsObjects();
 
         for (IDrawable drawable : this.UILayer)
         {
+            drawable.setSelfDestructWhenOffScreen();
             drawable.setXSpeed(-spaceShipXSpeed);
             drawable.setYSpeed(-spaceShipYSpeed);
         }
 
         for (IDrawable drawable : this.spaceShipLayer)
         {
+            drawable.setSelfDestructWhenOffScreen();
             drawable.setXSpeed(-spaceShipXSpeed);
             drawable.setYSpeed(-spaceShipYSpeed);
         }
+
+        for (IDrawable drawable : this.spaceStationLayer)
+        {
+            drawable.setSelfDestructWhenOffScreen();
+            drawable.setXSpeed(-spaceShipXSpeed);
+            drawable.setYSpeed(-spaceShipYSpeed);
+        }
+
+        this.tileMapXSpeed = -spaceShipXSpeed;
+        this.tileMapYSpeed = -spaceShipYSpeed;
     }
 
     public TileMap getTileMap()
     {
         return this.tileMap;
+    }
+
+    public void stopAllSounds()
+    {
+        for (IGameSound sound : this.sounds)
+        {
+            sound.finishPlaying();
+        }
     }
 
     public enum ERenderLayer

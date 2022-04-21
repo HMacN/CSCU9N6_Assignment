@@ -1,19 +1,24 @@
 package spaceShipGame;
 
+import CSCU9N6Library.Sound;
 import factories.EntityUpdateFactory;
 import CSCU9N6Library.GameCore;
-import gameStates.IGameState;
-import gameStates.MainMenuState;
+import gameStates.*;
 import helperClasses.UserInputHandler;
+import levelEvents.GravityShift;
+import levelEvents.PlaySound;
+import levelEvents.ShipManoeuvre;
+import levelEvents.TerminateState;
 import physics.PhysicsEngine;
 
 import java.awt.*;
+
+import static gameStates.EGameState.*;
 
 /**
  * Game created for CSCU9N6 Computer Games Development.
  *
  * Student Number: 2823735
- * Date of Submission: 14/04/2022
  */
 
 public class SpaceshipGame extends GameCore
@@ -28,7 +33,8 @@ public class SpaceshipGame extends GameCore
     //Set up classes to handle the in-game logic.
     private PhysicsEngine physics = new PhysicsEngine(gameObjects.getColliders());
     private EntityUpdateFactory entityUpdateFactory = new EntityUpdateFactory();
-    private IGameState gameState = new MainMenuState(this);
+    private IGameState gameState;
+    private EGameState nextState;
 
     /**
 	 * The obligatory main method that creates
@@ -56,8 +62,9 @@ public class SpaceshipGame extends GameCore
         //Register objects with each other.
         this.gameObjects.setPhysicsEngine(this.physics);
 
-        //Load the initial game state.
-        loadNewGameState(gameState);
+        //Load the first game state.
+        this.nextState = mainMenu;
+        this.loadNextGameState();
     }
 
     /**
@@ -65,10 +72,48 @@ public class SpaceshipGame extends GameCore
      *
      * @param newState  An IGameState which describes the new state to be loaded.
      */
-    public void loadNewGameState(IGameState newState)
+    public void prepareToLoadNewGameState(EGameState newState)
     {
-        //Set the new game state.
-        this.gameState = newState;
+        float horizontalClearanceSpeed = -0.6f;
+        float verticalClearanceSpeed = 0.0f;
+
+        this.nextState = newState;
+
+        if (this.gameState != null) //If there is already a game state loaded
+        {
+            //this.gameState.pause()
+            //this.gameState.addLevelEvent(new ShipManoeuvre());
+            //this.physics.pause();
+            this.gameObjects.clearForeground(horizontalClearanceSpeed, verticalClearanceSpeed);
+
+            if (!mainMenu.matches(this.gameState))
+            {
+                //Announce the end of the level, if this wasn't a menu.
+                this.gameState.addLevelEvent(new PlaySound(new Sound("sounds/gameOver.wav"), this.getGameObjects()), 0);
+            }
+
+            this.gameState.addLevelEvent(new ShipManoeuvre(horizontalClearanceSpeed, verticalClearanceSpeed, this.entityUpdateFactory), 0);
+            this.gameState.addLevelEvent(new TerminateState(this), 4_000);
+        }
+    }
+
+    public void loadNextGameState()
+    {
+        //Clear away the last of the old state.  All render-able objects should have left the screen by now.
+        this.gameObjects.removeTileMap();
+        this.gameObjects.stopAllSounds();
+
+        //Load up the new game state.
+        switch (this.nextState)
+        {
+            case mainMenu:  this.gameState = new MainMenuState(this); break;
+            case levelOne:  this.gameState = new LevelOneGameState(this); break;
+        }
+
+        //Make sure that all states start with no movement or gravity.
+        this.entityUpdateFactory.setSpaceshipYSpeed(0.0f);
+        this.entityUpdateFactory.setSpaceshipXSpeed(0.0f);
+        this.physics.setGravity(0.0f, 0.0f);
     }
 
     /**

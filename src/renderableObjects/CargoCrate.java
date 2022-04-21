@@ -1,6 +1,7 @@
 package renderableObjects;
 
 import CSCU9N6Library.Sprite;
+import helperClasses.Debug;
 import helperClasses.EntityUpdate;
 import factories.SpriteFactory;
 import physics.Collider;
@@ -28,27 +29,41 @@ public class CargoCrate implements IDrawable
     @Override
     public void draw(Graphics2D graphics2D, float xOffset, float yOffset)
     {
-        this.sprite.setX(this.collider.getXCoord() + xOffset);
-        this.sprite.setY(this.collider.getYCoord() + yOffset);
+        if (!this.selfDestructWhenOffScreen)    //If not set to self destruct
+        {
+            //Update to the collider position.
+            this.sprite.setX(this.collider.getXCoord());
+            this.sprite.setY(this.collider.getYCoord());
+
+            //Apply the offset.
+            this.sprite.setX(this.sprite.getX() + xOffset);
+            this.sprite.setY(this.sprite.getY() + yOffset);
+        }
+
+
+
+        //Draw the sprite.
         this.sprite.drawTransformed(graphics2D);
     }
 
     @Override
     public void update(EntityUpdate entityUpdate)
     {
-        //Don't actually do an update, as nothing needs updated for the sprite, and the collider is updated separately.
+        this.sprite.update(entityUpdate.getMillisSinceLastUpdate());
     }
 
     @Override
     public void setXSpeed(float xSpeed)
     {
         this.sprite.setVelocityX(xSpeed);
+        Debug.print("Crate horizontal speed: " + this.sprite.getVelocityX());
     }
 
     @Override
     public void setYSpeed(float ySpeed)
     {
         this.sprite.setVelocityY(ySpeed);
+        Debug.print("Crate vertical speed: " + this.sprite.getVelocityY());
     }
 
     @Override

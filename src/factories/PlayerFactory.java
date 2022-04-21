@@ -24,11 +24,7 @@ public class PlayerFactory implements IGameObjectFactory
         if (this.player == null)    //If there isn't already a player.
         {
             this.player = new Player(
-                    this.spaceshipGame.getScreenWidth(),
-                    this.spaceshipGame.getScreenHeight(),
-                    this.spaceshipGame.getEntityUpdateFactory(),
-                    this.spaceshipGame.getUserInputHandler(),
-                    this.gameObjects.getTileMap(),
+                    this.spaceshipGame,
                     xCoord,
                     yCoord);
 

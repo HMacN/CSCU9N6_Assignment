@@ -1,5 +1,6 @@
 package gameStates;
 
+import CSCU9N6Library.Sound;
 import factories.EntityUpdateFactory;
 import factories.SpriteFactory;
 import helperClasses.*;
@@ -166,6 +167,7 @@ public class MainMenuState implements IGameState
         public void onButtonPress()
         {
             this.mainMenuState.addLevelEvent(new PrepareToEndLevel(this.spaceshipGame, EGameState.levelOne), 500);
+            this.mainMenuState.addLevelEvent(new PlaySound(new Sound("sounds/buttonClick.wav"), this.spaceshipGame.getGameObjects()), 0);
         }
     }
 }

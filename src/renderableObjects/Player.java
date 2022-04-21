@@ -2,16 +2,19 @@ package renderableObjects;
 
 import CSCU9N6Library.Sprite;
 import CSCU9N6Library.TileMap;
+import factories.BulletFactory;
 import factories.EntityUpdateFactory;
 import factories.SpriteFactory;
 import helperClasses.*;
 import physics.Collider;
+import physics.IHasCollider;
+import spaceShipGame.SpaceshipGame;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class Player implements IDrawable, KeyListener
+public class Player implements IDrawable, KeyListener, IHasCollider
 {
     private Sprite movingSprite = SpriteFactory.getSpriteFromPNGFile("playerAnim", 1, 4, 60);
     private Sprite stillSprite = SpriteFactory.getSpriteFromPNGFile("player", 1, 1, 10_000);
@@ -24,8 +27,10 @@ public class Player implements IDrawable, KeyListener
     private float startingY;
     private float screenHeight;
     private float screenWidth;
+    private EPlayerState playerState = EPlayerState.standingStill;
 
     private EntityUpdateFactory updateFactory;
+    private BulletFactory bulletFactory;
     private UserInputHandler inputHandler;
     private TileMap tileMap;
 
@@ -35,10 +40,10 @@ public class Player implements IDrawable, KeyListener
     private boolean rightKeyPressed = false;
     private float controlAuthority = 0.1f;
 
-    public Player(int screenWidth, int screenHeight, EntityUpdateFactory updateFactory, UserInputHandler inputHandler, TileMap tileMap, float xCoord, float yCoord)
+    public Player(SpaceshipGame spaceshipGame, float xCoord, float yCoord)
     {
-        this.screenHeight = screenHeight;
-        this.screenWidth = screenWidth;
+        this.screenHeight = spaceshipGame.getScreenHeight();
+        this.screenWidth = spaceshipGame.getScreenWidth();
         this.startingX = screenWidth / 2.0f;
         this.startingY = screenHeight / 2.0f;
 
@@ -50,12 +55,13 @@ public class Player implements IDrawable, KeyListener
         this.stillSprite.setY(this.startingY);
         this.stillSprite.setScale(0.70f);
 
-        this.collider = new Collider(xCoord, yCoord, 31.0f, 31.0f, 1.0f);
+        this.collider = new Collider(xCoord, yCoord, 31.0f, 31.0f, 1.0f, this);
 
-        this.updateFactory = updateFactory;
-        this.inputHandler = inputHandler;
+        this.updateFactory = spaceshipGame.getEntityUpdateFactory();
+        this.inputHandler = spaceshipGame.getUserInputHandler();
         this.inputHandler.addKeyListener(this);
-        this.tileMap = tileMap;
+        this.tileMap = spaceshipGame.getGameObjects().getTileMap();
+        this.bulletFactory = new BulletFactory(spaceshipGame, spaceshipGame.getGameObjects());
     }
 
     public Collider getCollider()
@@ -83,6 +89,74 @@ public class Player implements IDrawable, KeyListener
         }
 
         workOutIfOnLadderAndSetColliderToIgnoreGravityIfSo();
+
+        setSpriteAndControlSpeedForPlayerState();
+    }
+
+    private void setSpriteAndControlSpeedForPlayerState()
+    {
+        switch (this.playerState)
+        {
+            case standingStill:
+            {
+                this.sprite = this.stillSprite;
+                this.collider.setXControlSpeed(0.0f);
+                this.collider.setYControlSpeed(0.0f);
+                break;
+            }
+            case facingLeft:
+            {
+                this.sprite = this.movingSprite;
+                this.sprite.pauseAnimationAtFrame(1);
+                this.sprite.setScale(-0.7f, 0.7f);
+                this.collider.setXControlSpeed(0.0f);
+                this.collider.setYControlSpeed(0.0f);
+                break;
+            }
+            case facingRight:
+            {
+                this.sprite = this.movingSprite;
+                this.sprite.pauseAnimationAtFrame(1);
+                this.sprite.setScale(0.7f, 0.7f);
+                this.collider.setXControlSpeed(0.0f);
+                this.collider.setYControlSpeed(0.0f);
+                break;
+            }
+            case goingLeft:
+            {
+                this.sprite = this.movingSprite;
+                this.sprite.playAnimation();
+                this.sprite.setScale(-0.7f, 0.7f);
+                this.collider.setXControlSpeed(-1 * this.controlAuthority);
+                this.collider.setYControlSpeed(0.0f);
+                break;
+            }
+            case goingRight:
+            {
+                this.sprite = this.movingSprite;
+                this.sprite.playAnimation();
+                this.sprite.setScale(0.7f, 0.7f);
+                this.collider.setXControlSpeed(this.controlAuthority);
+                this.collider.setYControlSpeed(0.0f);
+                break;
+            }
+            case goingUp:
+            {
+                this.sprite = this.stillSprite;
+                this.sprite.setScale(0.7f, 0.7f);
+                this.collider.setXControlSpeed(0.0f);
+                this.collider.setYControlSpeed(-1 * this.controlAuthority);
+                break;
+            }
+            case goingDown:
+            {
+                this.sprite = this.stillSprite;
+                this.sprite.setScale(0.7f, 0.7f);
+                this.collider.setXControlSpeed(0.0f);
+                this.collider.setYControlSpeed(this.controlAuthority);
+                break;
+            }
+        }
     }
 
     private void workOutIfOnLadderAndSetColliderToIgnoreGravityIfSo()
@@ -155,43 +229,41 @@ public class Player implements IDrawable, KeyListener
 
         if (keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_KP_UP)
         {
-            if (!this.upKeyPressed)    //Only if the key isn't already down.
+            this.upKeyPressed = true;
+
+            if (atMostOneKeyFlagSet())    //Only if this is the only key pressed.
             {
-                this.upKeyPressed = true;
-                this.collider.setYControlSpeed(-this.controlAuthority);    //Add control speed to the player.
+                this.playerState = EPlayerState.goingUp;
             }
         }
 
         if (keyCode == KeyEvent.VK_S || keyCode == KeyEvent.VK_DOWN || keyCode == KeyEvent.VK_KP_DOWN)
         {
-            if (!this.downKeyPressed) //Only if the key isn't already down.
+            this.downKeyPressed = true;
+
+            if (atMostOneKeyFlagSet())    //Only if this is the only key pressed.
             {
-                this.downKeyPressed = true;
-                this.collider.setYControlSpeed(this.controlAuthority);    //Add control speed to the player.
+                this.playerState = EPlayerState.goingDown;
             }
         }
 
         if (keyCode == KeyEvent.VK_A || keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_KP_LEFT)
         {
-            if (!this.leftKeyPressed) //Only if the key isn't already down.
-            {
-                sprite = movingSprite;
+            this.leftKeyPressed = true;
 
-                this.leftKeyPressed = true;
-                this.collider.setXControlSpeed(-this.controlAuthority);    //Add control speed to the player.
-                this.sprite.setScale(-0.7f, 0.7f);
+            if (atMostOneKeyFlagSet())    //Only if this is the only key pressed.
+            {
+                this.playerState = EPlayerState.goingLeft;
             }
         }
 
         if (keyCode == KeyEvent.VK_D || keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_KP_RIGHT)
         {
-            sprite = movingSprite;
+            this.rightKeyPressed = true;
 
-            if (!this.rightKeyPressed) //Only if the key isn't already down.
+            if (atMostOneKeyFlagSet())    //Only if this is the only key pressed.
             {
-                this.rightKeyPressed = true;
-                this.collider.setXControlSpeed(this.controlAuthority);    //Add control speed to the player.
-                this.sprite.setScale(0.7f, 0.7f);
+                this.playerState = EPlayerState.goingRight;
             }
         }
     }
@@ -201,45 +273,89 @@ public class Player implements IDrawable, KeyListener
     {
         int keyCode = e.getKeyCode();
 
+        if (keyCode == KeyEvent.VK_SPACE)
+        {
+            spawnABulletInTheCorrectDirection();
+        }
+
         if (keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_KP_UP)
         {
-            if (this.upKeyPressed)    //Only if the key is already down.
+            this.upKeyPressed = false;
+
+            if (atMostOneKeyFlagSet())    //Only if this is the last key to be released.
             {
-                this.upKeyPressed = false;
-                this.collider.setYControlSpeed(0.0f);    //Stop the player.
+                this.playerState = EPlayerState.standingStill;
             }
         }
 
         if (keyCode == KeyEvent.VK_S || keyCode == KeyEvent.VK_DOWN || keyCode == KeyEvent.VK_KP_DOWN)
         {
-            if (this.downKeyPressed)    //Only if the key is already down.
+            this.downKeyPressed = false;
+
+            if (atMostOneKeyFlagSet())    //Only if this is the last key to be released.
             {
-                this.downKeyPressed = false;
-                this.collider.setYControlSpeed(0.0f);    //Stop the player.
+                this.playerState = EPlayerState.standingStill;
             }
         }
 
         if (keyCode == KeyEvent.VK_A || keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_KP_LEFT)
         {
-            sprite = stillSprite;
+            this.leftKeyPressed = false;
 
-            if (this.leftKeyPressed)    //Only if the key is already down.
+            if (atMostOneKeyFlagSet())    //Only if this is the last key to be released.
             {
-                this.leftKeyPressed = false;
-                this.collider.setXControlSpeed(0.0f);    //Stop the player.
+                this.playerState = EPlayerState.facingLeft;
             }
         }
 
         if (keyCode == KeyEvent.VK_D || keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_KP_RIGHT)
         {
-            sprite = stillSprite;
+            this.rightKeyPressed = false;
 
-            if (this.rightKeyPressed)    //Only if the key is already down.
+            if (atMostOneKeyFlagSet())    //Only if this is the last key to be released.
             {
-                this.rightKeyPressed = false;
-                this.collider.setXControlSpeed(0.0f);    //Stop the player.
+                this.playerState = EPlayerState.facingRight;
             }
         }
+    }
+
+    private void spawnABulletInTheCorrectDirection()
+    {
+        float bulletStartingX = this.collider.getXAxisCentroid();
+        float bulletStartingY = this.collider.getYAxisCentroid();
+
+
+        if (this.playerState == EPlayerState.facingLeft || this.playerState == EPlayerState.goingLeft)
+        {
+            this.bulletFactory.setBulletsGoingLeft();
+            bulletStartingX = bulletStartingX - collider.getWidth();    //Give it half a player width to not immediately collide with the player.
+            this.bulletFactory.spawnNewAt(bulletStartingX, bulletStartingY);
+        }
+        else if (this.playerState == EPlayerState.facingRight || this.playerState == EPlayerState.goingRight)
+        {
+            this.bulletFactory.setBulletsGoingRight();
+            bulletStartingX = bulletStartingX + collider.getWidth();    //Give it half a player width to not immediately collide with the player.
+            this.bulletFactory.spawnNewAt(bulletStartingX, bulletStartingY);
+        }
+    }
+
+    private boolean atMostOneKeyFlagSet()
+    {
+        int keys = 0;
+
+        if (this.leftKeyPressed)
+            keys++;
+        if (this.rightKeyPressed)
+            keys++;
+        if (this.upKeyPressed)
+            keys++;
+        if (this.downKeyPressed)
+            keys++;
+
+        if (keys <= 1)
+            return true;
+
+        return false;
     }
 
     private void stopHorizontalSpeedOnlyIfNotUnderPlayerControl()
@@ -255,5 +371,31 @@ public class Player implements IDrawable, KeyListener
         }
 
         this.collider.setXSpeed(0.0f);  //Stop player moving horizontally.
+    }
+
+    @Override
+    public void hasCollidedWith(Object object)
+    {
+
+    }
+
+    @Override
+    public void collidedWithTile()
+    {
+
+    }
+
+    private enum EPlayerState
+    {
+        standingStill,
+
+        facingLeft,
+        goingLeft,
+
+        facingRight,
+        goingRight,
+
+        goingUp,
+        goingDown,
     }
 }

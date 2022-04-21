@@ -1,30 +1,45 @@
 package renderableObjects;
 
+import CSCU9N6Library.Sound;
 import CSCU9N6Library.Sprite;
-import helperClasses.Debug;
-import helperClasses.EntityUpdate;
 import factories.SpriteFactory;
+import helperClasses.EntityUpdate;
 import physics.Collider;
 import physics.IHasCollider;
+import soundsAndMusic.DistanceSound;
+import spaceShipGame.GameObjects;
+import spaceShipGame.SpaceshipGame;
 
 import java.awt.*;
 
-public class CargoCrate implements IDrawable, IHasCollider
+public class Bullet implements IDrawable, IHasCollider
 {
     private Sprite sprite;
     private Collider collider;
+    private GameObjects gameObjects;
+    private SpaceshipGame spaceshipGame;
 
     private boolean selfDestructWhenOffScreen = false;
     private float screenWidth;
     private float screenHeight;
 
-    public CargoCrate(float xCoord, float yCoord, float screenWidth, float screenHeight)
+    public Bullet(float screenWidth, float screenHeight, float xCoord, float yCoord, float xSpeed, float ySpeed, GameObjects gameObjects, SpaceshipGame spaceshipGame)
     {
-        this.sprite = SpriteFactory.getSpriteFromPNGFile("crate");
+        this.sprite = SpriteFactory.getSpriteFromPNGFile("bullet", 1, 4, 60);
+        this.sprite.playAnimation();
         this.sprite.show();
-        this.collider = new Collider(xCoord, yCoord, 31.0f, 31.0f, 5.0f, this);
+
+        this.collider = new Collider(xCoord, yCoord, 8.0f, 8.0f, -1.0f, this);  //Negative mass!  Ray Gun bullets can "pull" things.
+        this.collider.setXSpeed(xSpeed);
+        this.collider.setYSpeed(ySpeed);
+        this.collider.setIgnoringFriction(true);
+        this.collider.setIgnoringGravity(true);
+
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
+
+        this.gameObjects = gameObjects;
+        this.spaceshipGame = spaceshipGame;
     }
 
     @Override
@@ -41,10 +56,8 @@ public class CargoCrate implements IDrawable, IHasCollider
             this.sprite.setY(this.sprite.getY() + yOffset);
         }
 
-
-
         //Draw the sprite.
-        this.sprite.drawTransformed(graphics2D);
+        this.sprite.draw(graphics2D);
     }
 
     @Override
@@ -100,12 +113,19 @@ public class CargoCrate implements IDrawable, IHasCollider
     @Override
     public void hasCollidedWith(Object object)
     {
-
+        handleHittingSomething();
     }
 
     @Override
     public void collidedWithTile()
     {
+        handleHittingSomething();
+    }
 
+    private void handleHittingSomething()
+    {
+        this.sprite.hide();
+        this.collider.setToSelfDestruct();
+        this.gameObjects.addSound(new DistanceSound("sounds/zap.wav", this.gameObjects, this.spaceshipGame, this.collider));
     }
 }

@@ -17,10 +17,15 @@ public class Collider
 
     private boolean selfDestruct = false;
     private boolean ignoringGravity = false;
+    private boolean ignoringFriction = false;
     private boolean collisionsAlreadyHandled = false;
 
-    public Collider(float xCoord, float yCoord, float width, float height, float mass)
+    private IHasCollider parent;
+
+    public Collider(float xCoord, float yCoord, float width, float height, float mass, IHasCollider parent)
     {
+        this.parent = parent;
+
         this.xCoord = xCoord;
         this.yCoord = yCoord;
         this.width = width;
@@ -160,5 +165,30 @@ public class Collider
     public void setYControlSpeed(float yControlSpeed)
     {
         this.yControlSpeed = yControlSpeed;
+    }
+
+    public boolean isIgnoringFriction()
+    {
+        return this.ignoringFriction;
+    }
+
+    public void setIgnoringFriction(boolean ignoringFriction)
+    {
+        this.ignoringFriction = ignoringFriction;
+    }
+
+    public void bouncedOffTile()
+    {
+        this.parent.collidedWithTile();
+    }
+
+    public IHasCollider getParent()
+    {
+        return this.parent;
+    }
+
+    public void hasCollidedWith(IHasCollider thingThatThisColliderHasHit)
+    {
+        this.parent.hasCollidedWith(thingThatThisColliderHasHit);
     }
 }

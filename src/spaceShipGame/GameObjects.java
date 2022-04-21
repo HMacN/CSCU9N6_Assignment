@@ -268,5 +268,13 @@ public class GameObjects
         UILayer
     }
 
+    public float getPlayerXOffset()
+    {
+        return playerXOffset;
+    }
 
+    public float getPlayerYOffset()
+    {
+        return playerYOffset;
+    }
 }

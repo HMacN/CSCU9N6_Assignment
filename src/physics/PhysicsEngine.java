@@ -117,6 +117,10 @@ public class PhysicsEngine
             //Only handle vertical impulse.
             processVerticalImpulseTransfer(collider, otherCollider);
         }
+
+        //Tell the colliders parents what they've hit.
+        collider.hasCollidedWith(otherCollider.getParent());
+        otherCollider.hasCollidedWith(collider.getParent());
     }
 
     private float findDistanceToMoveVerticallyToEscapeCollision(Collider collider, Collider otherCollider)
@@ -250,6 +254,11 @@ public class PhysicsEngine
 
     private void handleFriction(Collider collider, float frictionChangeFactor)
     {
+        if (collider.isIgnoringFriction())  //Ignore this collider if it ignores friction.
+        {
+            return;
+        }
+
         //Apply an amount of friction so that objects come to a stop.
         collider.setYSpeed(collider.getYSpeed() * (1 - frictionChangeFactor));
         collider.setXSpeed(collider.getXSpeed() * (1 - frictionChangeFactor));
@@ -257,7 +266,7 @@ public class PhysicsEngine
 
     private void handleGravity(Collider collider, float xAxisGravityAcceleration, float yAxisGravityAcceleration)
     {
-        if (collider.isIgnoringGravity())
+        if (collider.isIgnoringGravity() || collider.getInverseMass() <= 0) //If the collider is ignoring gravity, or shouldn't be affected by it:
         {
             return;
         }
@@ -419,7 +428,6 @@ public class PhysicsEngine
         {
             handleTwoCornerTileCollision(collider, collidingTopLeft, collidingTopRight, collidingBottomLeft, collidingBottomRight);
         }
-
     }
 
     private void moveColliderToGetAwayFromTile(Collider collider, EDirection direction)
@@ -429,24 +437,32 @@ public class PhysicsEngine
             collider.setYSpeed(-collider.getYSpeed() * this.speedLossDueToTileMapCollision);  //Reverse the y-axis velocity.
             collider.setYCoord(collider.getYCoord() - getYAxisGridOffset(collider) + heightDiffBetweenEntitySizeAndTileSize(collider));  //Move the collider up out of the collision.
             handleMinimumSpeed(collider);
+
+            collider.bouncedOffTile();
         }
         else if (direction == EDirection.down)
         {
             collider.setYSpeed(-collider.getYSpeed() * this.speedLossDueToTileMapCollision);  //Reverse the y-axis velocity.
             collider.setYCoord(collider.getYCoord() + (this.tileMap.getTileHeight() - getYAxisGridOffset(collider)));  //Move the collider down out of the collision.
             handleMinimumSpeed(collider);
+
+            collider.bouncedOffTile();
         }
         else if (direction == EDirection.left)
         {
             collider.setXSpeed(-collider.getXSpeed() * this.speedLossDueToTileMapCollision);  //Reverse the x-axis velocity.
             collider.setXCoord(collider.getXCoord() - getXAxisGridOffset(collider) + widthDiffBetweenEntitySizeAndTileSize(collider));  //Move the collider left out of the collision.
             handleMinimumSpeed(collider);
+
+            collider.bouncedOffTile();
         }
         else if (direction == EDirection.right)
         {
             collider.setXSpeed(-collider.getXSpeed() * this.speedLossDueToTileMapCollision);  //Reverse the x-axis velocity.
             collider.setXCoord(collider.getXCoord() + (this.tileMap.getTileWidth() - getXAxisGridOffset(collider)));  //Move the collider right out of the collision.
             handleMinimumSpeed(collider);
+
+            collider.bouncedOffTile();
         }
     }
 
@@ -482,7 +498,7 @@ public class PhysicsEngine
         rightFace
     }
 
-    private enum EDirection
+    public enum EDirection
     {
         up,
         down,

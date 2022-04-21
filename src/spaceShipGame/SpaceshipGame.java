@@ -1,19 +1,20 @@
 package spaceShipGame;
 
 import CSCU9N6Library.Sound;
-import factories.EntityUpdateFactory;
+import factories.*;
 import CSCU9N6Library.GameCore;
 import gameStates.*;
 import helperClasses.UserInputHandler;
-import levelEvents.GravityShift;
-import levelEvents.PlaySound;
-import levelEvents.ShipManoeuvre;
-import levelEvents.TerminateState;
+import levelEvents.*;
 import physics.PhysicsEngine;
+import soundsAndMusic.MIDIPlayer;
 
 import java.awt.*;
 
 import static gameStates.EGameState.*;
+import static helperClasses.TilemapHelper.ETileType.*;
+import static spaceShipGame.GameObjects.ERenderLayer.UILayer;
+import static spaceShipGame.GameObjects.ERenderLayer.spaceStationLayer;
 
 /**
  * Game created for CSCU9N6 Computer Games Development.
@@ -35,6 +36,11 @@ public class SpaceshipGame extends GameCore
     private EntityUpdateFactory entityUpdateFactory = new EntityUpdateFactory();
     private IGameState gameState;
     private EGameState nextState;
+
+    private LevelEventFactory levelEventFactory = new LevelEventFactory(this);
+    private PlayerFactory playerFactory = new PlayerFactory(this, this.getGameObjects());
+    private CargoCrateFactory cargoCrateFactory = new CargoCrateFactory(this, this.getGameObjects());
+    private MonsterFactory monsterFactory = new MonsterFactory(this, this.getGameObjects());
 
     /**
 	 * The obligatory main method that creates
@@ -89,7 +95,7 @@ public class SpaceshipGame extends GameCore
         {
             this.gameObjects.clearForeground(horizontalClearanceSpeed, verticalClearanceSpeed);
 
-            if (!mainMenu.matches(this.gameState))
+            if (!this.gameState.getClass().equals(MainMenuState.class))
             {
                 //Announce the end of the level, if this wasn't a menu.
                 this.gameState.addLevelEvent(new PlaySound(new Sound("sounds/gameOver.wav"), this.getGameObjects()), 0);
@@ -105,21 +111,120 @@ public class SpaceshipGame extends GameCore
         //Clear away the last of the old state.  All render-able objects should have left the screen by now.
         this.gameObjects.removeTileMap();
         this.gameObjects.stopAllSounds();
+        this.entityUpdateFactory.reset();
+        this.playerFactory = new PlayerFactory(this, this.getGameObjects());
 
         //Load up the new game state.
         switch (this.nextState)
         {
-            case mainMenu:  this.gameState = new MainMenuState(this); break;
-            case levelOne:  this.gameState = new LevelOneGameState(this); break;
-            case levelTwo:  this.gameState = new LevelTwoGameState(this); break;
-            case levelThree:  this.gameState = new LevelThreeGameState(this); break;
-
+            case mainMenu:
+            {
+                this.gameState = new MainMenuState(this);
+                //Main menu adds it's events internally, as it has a few "funny" elements, like buttons, to add.
+                break;
+            }
+            case levelOne:
+            {
+                this.gameState = new LevelGameState(this, "SpaceShipOne.txt");
+                addLevelOneEvents();
+                break;
+            }
+            case levelTwo:
+            {
+                this.gameState = new LevelGameState(this, "SpaceShipTwo.txt");
+                addLevelTwoEvents();
+                break;
+            }
+            case levelThree:
+            {
+                this.gameState = new LevelGameState(this, "SpaceShipThree.txt");
+                addLevelThreeEvents();
+                break;
+            }
         }
 
         //Make sure that all states start with no movement or gravity.
         this.entityUpdateFactory.setSpaceshipYSpeed(0.0f);
         this.entityUpdateFactory.setSpaceshipXSpeed(0.0f);
         this.physics.setGravity(0.0f, 0.0f);
+    }
+
+    private void addLevelThreeEvents()
+    {
+        this.levelEventFactory.setGameState(this.gameState);
+
+        //Get set up.
+        this.levelEventFactory.addShipManoeuvreEvent(0.0f, -0.1f,  0);
+        this.levelEventFactory.addGravityShiftEvent(0.0f, 0.000_5f, 0);
+        this.levelEventFactory.addDisplayTileMapEvent(this.gameObjects.getTileMap(), 0);
+        this.levelEventFactory.addSpawnEvent(player, this.gameObjects.getTileMap(), playerFactory, 0);
+        this.levelEventFactory.addSpawnEvent(cargoCrate, this.gameObjects.getTileMap(), this.cargoCrateFactory, 0);
+
+        //Accelerate
+        this.levelEventFactory.addShipManoeuvreEvent(-0.5f, -0.5f,  6_000);
+        this.levelEventFactory.addGravityShiftEvent(0.000_5f, 0.000_5f, 6_000);
+
+        //Start cruising
+        this.levelEventFactory.addShipManoeuvreEvent(-0.5f, -0.0f,  12_000);
+        this.levelEventFactory.addGravityShiftEvent(0.000_0f, 0.000_5f, 12_000);
+
+        //Monster Attack!
+        this.levelEventFactory.addSpawnEvent(monster, this.gameObjects.getTileMap(), this.monsterFactory, 15_000);
+
+        //End the level after a couple of minutes.
+        this.levelEventFactory.addPrepareToEndLevelEvent(mainMenu, 60_000);
+    }
+
+    private void addLevelTwoEvents()
+    {
+        this.levelEventFactory.setGameState(this.gameState);
+
+        //Get set up.
+        this.levelEventFactory.addShipManoeuvreEvent(0.0f, -0.1f,  0);
+        this.levelEventFactory.addGravityShiftEvent(0.0f, 0.000_5f, 0);
+        this.levelEventFactory.addDisplayTileMapEvent(this.gameObjects.getTileMap(), 0);
+        this.levelEventFactory.addSpawnEvent(player, this.gameObjects.getTileMap(), playerFactory, 0);
+        this.levelEventFactory.addSpawnEvent(cargoCrate, this.gameObjects.getTileMap(), this.cargoCrateFactory, 0);
+
+        //Accelerate
+        this.levelEventFactory.addShipManoeuvreEvent(-0.5f, -0.5f,  6_000);
+        this.levelEventFactory.addGravityShiftEvent(0.000_5f, 0.000_5f, 6_000);
+
+        //Start cruising
+        this.levelEventFactory.addShipManoeuvreEvent(-0.5f, -0.0f,  12_000);
+        this.levelEventFactory.addGravityShiftEvent(0.000_0f, 0.000_5f, 12_000);
+
+        //Monster Attack!
+        this.levelEventFactory.addSpawnEvent(monster, this.gameObjects.getTileMap(), this.monsterFactory, 15_000);
+
+        //End the level after a couple of minutes.
+        this.levelEventFactory.addPrepareToEndLevelEvent(mainMenu, 60_000);
+    }
+
+    private void addLevelOneEvents()
+    {
+        this.levelEventFactory.setGameState(this.gameState);
+
+        //Get set up.
+        this.levelEventFactory.addShipManoeuvreEvent(0.0f, -0.1f,  0);
+        this.levelEventFactory.addGravityShiftEvent(0.0f, 0.000_5f, 0);
+        this.levelEventFactory.addDisplayTileMapEvent(this.gameObjects.getTileMap(), 0);
+        this.levelEventFactory.addSpawnEvent(player, this.gameObjects.getTileMap(), playerFactory, 0);
+        this.levelEventFactory.addSpawnEvent(cargoCrate, this.gameObjects.getTileMap(), this.cargoCrateFactory, 0);
+
+        //Accelerate
+        this.levelEventFactory.addShipManoeuvreEvent(-0.5f, -0.5f,  6_000);
+        this.levelEventFactory.addGravityShiftEvent(0.000_5f, 0.000_5f, 6_000);
+
+        //Start cruising
+        this.levelEventFactory.addShipManoeuvreEvent(-0.5f, -0.0f,  12_000);
+        this.levelEventFactory.addGravityShiftEvent(0.000_0f, 0.000_5f, 12_000);
+
+        //Monster Attack!
+        this.levelEventFactory.addSpawnEvent(monster, this.gameObjects.getTileMap(), this.monsterFactory, 15_000);
+
+        //End the level after a couple of minutes.
+        this.levelEventFactory.addPrepareToEndLevelEvent(mainMenu, 60_000);
     }
 
     /**

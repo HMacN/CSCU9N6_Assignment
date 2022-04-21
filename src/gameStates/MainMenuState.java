@@ -14,12 +14,13 @@ import soundsAndMusic.MIDIPlayer;
 import spaceShipGame.GameObjects;
 import spaceShipGame.SpaceshipGame;
 
-import javax.sound.midi.MidiChannel;
 import java.util.LinkedList;
 
 import static spaceShipGame.GameObjects.ERenderLayer.*;
 
-
+/**
+ * A game state for the main menu.  Presents the player with three buttons, one for each level of the game.
+ */
 public class MainMenuState implements IGameState
 {
     private GameObjects gameObjects;
@@ -43,6 +44,10 @@ public class MainMenuState implements IGameState
     private LinkedList<ILevelEvent> levelEvents = new LinkedList<>();
     private LinkedList<ILevelEvent> levelEventsToAdd = new LinkedList<>();
 
+    /**
+     * The constructor.
+     * @param spaceshipGame A SpaceshipGame object to interrogate for needed data.
+     */
     public MainMenuState(SpaceshipGame spaceshipGame)
     {
         //Capture input parameters.
@@ -65,9 +70,14 @@ public class MainMenuState implements IGameState
         //this.backgroundMusic.setSoloTrack(6, true);
         this.gameObjects.addSound(this.backgroundMusic);
 
-        addLevelEvents();
+        setUpLevelEvents();
     }
 
+    /**
+     * Safely adds a level event to the game state.
+     * @param event
+     * @param millisUntilEventTriggers
+     */
     @Override
     public void addLevelEvent(ILevelEvent event, long millisUntilEventTriggers)
     {
@@ -75,7 +85,10 @@ public class MainMenuState implements IGameState
         this.levelEventsToAdd.add(event);
     }
 
-    private void addLevelEvents()
+    /**
+     * Creates and adds the level events for this game state.
+     */
+    private void setUpLevelEvents()
     {
         this.eventFactory.setGameState(this);
 
@@ -88,6 +101,9 @@ public class MainMenuState implements IGameState
         eventFactory.addShipManoeuvreEvent(0.0f, -0.1f, 2_000);
     }
 
+    /**
+     * Updates the list of level events, and safely adds and removes level events without causing concurrentModificationExceptions.
+     */
     private void handleLevelEvents()
     {
         LinkedList<ILevelEvent> eventsToDelete = new LinkedList<>();
@@ -111,6 +127,11 @@ public class MainMenuState implements IGameState
         this.levelEvents.removeAll(eventsToDelete);
     }
 
+    /**
+     * Gets an EntityUpdate objects which can be used to update the rest of the game system.
+     * @param millisSinceLastUpdate A long which is the time since the last update
+     * @return  An EntityUpdate object which contains the relevant information.
+     */
     public EntityUpdate getUpdate(long millisSinceLastUpdate)
     {
         if (!this.paused)
@@ -130,6 +151,10 @@ public class MainMenuState implements IGameState
         return update;
     }
 
+    /**
+     * Creates a "launch pad" background entity and adds it to the GameObject collection.
+     * @return  A BackgroundEntity which is a launch pad to be rendered behind the space ship.
+     */
     private BackgroundEntity getLaunchPad()
     {
         BackgroundEntity launchPad = new BackgroundEntity(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -143,6 +168,10 @@ public class MainMenuState implements IGameState
         return launchPad;
     }
 
+    /**
+     * Creates and returns the button which will take the player to level one.
+     * @return  A GameButton object which contains the appropriate ButtonFunctionObject
+     */
     private GameButton getLevel1Button()
     {
         Sprite pressedSprite = SpriteFactory.getSpriteFromPNGFile("Level1Button");
@@ -154,6 +183,10 @@ public class MainMenuState implements IGameState
         return button;
     }
 
+    /**
+     * Creates and returns the button which will take the player to level two.
+     * @return  A GameButton object which contains the appropriate ButtonFunctionObject
+     */
     private GameButton getLevel2Button()
     {
         Sprite pressedSprite = SpriteFactory.getSpriteFromPNGFile("Level2Button");
@@ -165,6 +198,10 @@ public class MainMenuState implements IGameState
         return button;
     }
 
+    /**
+     * Creates and returns the button which will take the player to level three.
+     * @return  A GameButton object which contains the appropriate ButtonFunctionObject
+     */
     private GameButton getLevel3Button()
     {
         Sprite pressedSprite = SpriteFactory.getSpriteFromPNGFile("Level3Button");
@@ -176,17 +213,29 @@ public class MainMenuState implements IGameState
         return button;
     }
 
+    /**
+     * A class which can be passed in to a button, and which allows the button to reference back to this object and call a particular function.
+     * In this case, the function it to start level one.
+     */
     private static class ButtonOneFunctionObject implements IButtonFunctionObject
     {
         MainMenuState mainMenuState;
         SpaceshipGame spaceshipGame;
 
+        /**
+         * The constructor.
+         * @param mainMenuState The MainMenuState object to call a function in.
+         * @param spaceshipGame The SpaceShipGame object to interrogate for needed data.
+         */
         ButtonOneFunctionObject(MainMenuState mainMenuState, SpaceshipGame spaceshipGame)
         {
             this.mainMenuState = mainMenuState;
             this.spaceshipGame = spaceshipGame;
         }
 
+        /**
+         * Adds two level events to the MainMenuState, which set up the appropriate level.
+         */
         @Override
         public void onButtonPress()
         {
@@ -195,17 +244,29 @@ public class MainMenuState implements IGameState
         }
     }
 
+    /**
+     * A class which can be passed in to a button, and which allows the button to reference back to this object and call a particular function.
+     * In this case, the function it to start level two.
+     */
     private static class ButtonTwoFunctionObject implements IButtonFunctionObject
     {
         MainMenuState mainMenuState;
         SpaceshipGame spaceshipGame;
 
+        /**
+         * The constructor.
+         * @param mainMenuState The MainMenuState object to call a function in.
+         * @param spaceshipGame The SpaceShipGame object to interrogate for needed data.
+         */
         ButtonTwoFunctionObject(MainMenuState mainMenuState, SpaceshipGame spaceshipGame)
         {
             this.mainMenuState = mainMenuState;
             this.spaceshipGame = spaceshipGame;
         }
 
+        /**
+         * Adds two level events to the MainMenuState, which set up the appropriate level.
+         */
         @Override
         public void onButtonPress()
         {
@@ -214,17 +275,29 @@ public class MainMenuState implements IGameState
         }
     }
 
+    /**
+     * A class which can be passed in to a button, and which allows the button to reference back to this object and call a particular function.
+     * In this case, the function it to start level three.
+     */
     private static class ButtonThreeFunctionObject implements IButtonFunctionObject
     {
         MainMenuState mainMenuState;
         SpaceshipGame spaceshipGame;
 
+        /**
+         * The constructor.
+         * @param mainMenuState The MainMenuState object to call a function in.
+         * @param spaceshipGame The SpaceShipGame object to interrogate for needed data.
+         */
         ButtonThreeFunctionObject(MainMenuState mainMenuState, SpaceshipGame spaceshipGame)
         {
             this.mainMenuState = mainMenuState;
             this.spaceshipGame = spaceshipGame;
         }
 
+        /**
+         * Adds two level events to the MainMenuState, which set up the appropriate level.
+         */
         @Override
         public void onButtonPress()
         {

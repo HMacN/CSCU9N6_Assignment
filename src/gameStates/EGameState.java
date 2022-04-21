@@ -1,31 +1,12 @@
 package gameStates;
 
+/**
+ * An enum to track the different game states.  Includes a method to allow comparison of IGameState classes with the enum values.
+ */
 public enum EGameState
 {
     mainMenu,
     levelOne,
     levelTwo,
     levelThree,
-    undefinedState;
-
-    public boolean matches(IGameState unknownState)
-    {
-        EGameState stateFound = undefinedState;
-
-        if (unknownState.getClass().equals(MainMenuState.class))
-        {
-            stateFound = mainMenu;
-        }
-        else if (unknownState.getClass().equals((LevelOneGameState.class)))
-        {
-            stateFound = levelOne;
-        }
-
-        if(stateFound == this)
-        {
-            return true;
-        }
-
-        return false;
-    }
 }

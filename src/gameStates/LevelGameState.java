@@ -17,15 +17,17 @@ import java.awt.event.KeyListener;
 import java.util.LinkedList;
 
 import static spaceShipGame.GameObjects.ERenderLayer.*;
-import static helperClasses.TilemapHelper.ETileType.*;
 
-public class LevelThreeGameState implements IGameState, KeyListener
+/**
+ * A game state to contain a level of the game
+ */
+public class LevelGameState implements IGameState, KeyListener
 {
     private SpaceshipGame spaceshipGame;
     private EntityUpdateFactory updateFactory;
     private GameObjects gameObjects;
     private StarFieldGenerator starFieldGenerator = new StarFieldGenerator();
-    private TileMap tileMap = new TileMap();
+    private TileMap tileMap;
 
     private PlayerFactory playerFactory;
     private CargoCrateFactory crateFactory;
@@ -39,24 +41,35 @@ public class LevelThreeGameState implements IGameState, KeyListener
     private LinkedList<ILevelEvent> levelEvents = new LinkedList<>();
     private LinkedList<ILevelEvent> levelEventsToAdd = new LinkedList<>();
 
-    public LevelThreeGameState(SpaceshipGame spaceshipGame)
+    /**
+     * The constructor.
+     * @param spaceshipGame The SpaceshipGame object that this level is a part of.
+     */
+    public LevelGameState(SpaceshipGame spaceshipGame, String mapFile)
     {
         this.spaceshipGame = spaceshipGame;
         this.updateFactory = this.spaceshipGame.getEntityUpdateFactory();
         this.gameObjects = this.spaceshipGame.getGameObjects();
         this.physicsEngine = this.spaceshipGame.getPhysics();
 
-        this.tileMap.loadMap("maps", "SpaceShipThree.txt");
+        this.tileMap = new TileMap();
+        this.tileMap.loadMap("maps", mapFile);
+
+        this.gameObjects.addTileMap(this.tileMap);
         this.physicsEngine.setTileMap(this.tileMap);
 
         this.playerFactory = new PlayerFactory(this.spaceshipGame, this.gameObjects);
         this.crateFactory = new CargoCrateFactory(this.spaceshipGame, this.gameObjects);
         this.monsterFactory = new MonsterFactory(this.spaceshipGame, this.gameObjects);
 
-        addLevelEvents();
         this.spaceshipGame.getUserInputHandler().addKeyListener(this);
     }
 
+    /**
+     * Generates a new update data object, which will be used to update the rest of the program
+     * @param millisSinceLastUpdate A long which is the time since the last update
+     * @return  An EntityUpdate object with the needed update information
+     */
     @Override
     public EntityUpdate getUpdate(long millisSinceLastUpdate)
     {
@@ -78,6 +91,11 @@ public class LevelThreeGameState implements IGameState, KeyListener
         return update;
     }
 
+    /**
+     * Add a new LevelEvent to this level.
+     * @param event An ILevelEvent to add to the level
+     * @param millisUntilEventTriggers  A long which is the time for the event to occur
+     */
     @Override
     public void addLevelEvent(ILevelEvent event, long millisUntilEventTriggers)
     {
@@ -85,27 +103,9 @@ public class LevelThreeGameState implements IGameState, KeyListener
         this.levelEventsToAdd.add(event);
     }
 
-    private void addLevelEvents()
-    {
-        //Get set up.
-        addLevelEvent(new ShipManoeuvre(0.0f, -0.1f, this.updateFactory), 0);
-        addLevelEvent(new DisplayTileMap(this.tileMap, this.gameObjects, this.spaceshipGame.getScreenWidth(), this.spaceshipGame.getScreenHeight()), 0);
-        addLevelEvent(new SpawnGameObjects(player, this.tileMap, this.playerFactory), 0);
-        addLevelEvent(new SpawnGameObjects(cargoCrate, this.tileMap, this.crateFactory), 0);
-
-        //Accelerate
-        addLevelEvent(new ShipManoeuvre(-0.5f, 0.0f, this.updateFactory), 6_000);
-        addLevelEvent(new GravityShift(0.000_5f, -0.000_1f, this.physicsEngine), 6_000);
-
-        //Start cruising
-        addLevelEvent(new ShipManoeuvre(-0.15f, 0.0f, this.updateFactory), 10_000);
-        addLevelEvent(new GravityShift(0.0f, 0.000_5f, this.physicsEngine), 10_000);
-        addLevelEvent(new SpawnGameObjects(monster, this.tileMap, this.monsterFactory), 10_000);
-
-        //End the level after a couple of minutes.
-        addLevelEvent(new PrepareToEndLevel(this.spaceshipGame, EGameState.mainMenu), 120_000);
-    }
-
+    /**
+     * Updates all the level events with the current time, also safely adds new events and deletes old ones.
+     */
     private void handleLevelEvents()
     {
         LinkedList<ILevelEvent> eventsToDelete = new LinkedList<>();
@@ -129,18 +129,31 @@ public class LevelThreeGameState implements IGameState, KeyListener
         this.levelEvents.removeAll(eventsToDelete);
     }
 
+    /**
+     * Required function for the interface.
+     * @param e
+     */
     @Override
     public void keyTyped(KeyEvent e)
     {
 
     }
 
+    /**
+     * Required function for the interface.
+     * @param e
+     */
     @Override
     public void keyPressed(KeyEvent e)
     {
 
     }
 
+    /**
+     * registers keys being released and performs appropriate actions.
+     * "Enter" key: clears all events and return the game to the main menu.
+     * @param e A KeyEvent from the keyboard
+     */
     @Override
     public void keyReleased(KeyEvent e)
     {

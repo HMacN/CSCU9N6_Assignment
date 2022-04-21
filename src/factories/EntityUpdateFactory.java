@@ -87,4 +87,17 @@ public class EntityUpdateFactory
     {
         this.spaceshipYSpeed = spaceshipYSpeed;
     }
+
+    /**
+     * Clears away the data in the class, so that the next level can begin with a clean slate.
+     */
+    public void reset()
+    {
+        this.millisSinceLastUpdate = 0;
+        this.playerXOffset = 0.0f;
+        this.playerYOffset = 0.0f;
+        this.spaceshipXSpeed = 0.0f;
+        this.spaceshipYSpeed = 0.0f;
+
+    }
 }

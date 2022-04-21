@@ -1,0 +1,32 @@
+54 12 32 32
+// The first line should contain the width and height of the
+// map and the width and height of each tile. A list of character to
+// tile mappings is then provided where each character is preceded by a
+// # character. The dot character always defaults to a blank space 
+// Note that the referenced files should be in the same directory as the
+// tile map.
+#X=hull.png
+#o=porthole.png
+#l=ladder.png
+#z=bulkhead.png
+#c=bulkhead.png
+#p=bulkhead.png
+#M=bulkhead.png
+#^=gravLift.png
+// The actual tile map is preceded by the #map line
+#map
+...XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+..XXzllXzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzXllzzzX
+.XXzzllzzzzzzzzzzzzz^^zzzzzzzzzzzzzzzzzzzzzzzzzzllzzzX
+XXzzzllzzzoMMzozzzoz^^ozzzoMMMozzzozzzozzzozMMozllzzzX
+XXXXXllXXXXXXXXXXXXX^^XXXXXXXXXXXXXXXXXXXXXXXXXXllzzzX
+XoooollXzzzzzzzzzzzX^^XzzzzzMMMzzzzz^^zzzzzzzzzzllzzzX
+XoooollXoooooooooooo^^oooooooooooooo^^oooooooooolloooX
+XoooollXXXXXXXXXXXXX^^XXXXXXXXXXXXXX^^XXXXXXXXXXllzzzX
+Xoooollzzzzzzzzzzzzz^^zzzzzzzzzzzzzz^^zzzzzzzzzzllzzzX
+Xoooollzzcczzzzzzzzz^^zzzzzzcczzzzzz^^zzzzzcczzzllzzzX
+Xoooollpzcczzzzzzzzz^^zzzzzzcczzzzzz^^zzzzzcczMMllzzzX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+

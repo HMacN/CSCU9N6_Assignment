@@ -6,18 +6,31 @@ import spaceShipGame.SpaceshipGame;
 
 import static spaceShipGame.GameObjects.ERenderLayer.spaceShipLayer;
 
+/**
+ * A factory for player objects.  As there can be only one player, this factory keeps track of the spawned player object.
+ */
 public class PlayerFactory implements IGameObjectFactory
 {
     private Player player;
     private SpaceshipGame spaceshipGame;
     private GameObjects gameObjects;
 
+    /**
+     * The constructor.
+     * @param spaceshipGame A SpaceshipGame object to harvest for needed data
+     * @param gameObjects   A GameObjects class to add the new player object to.
+     */
     public PlayerFactory(SpaceshipGame spaceshipGame, GameObjects gameObjects)
     {
         this.spaceshipGame = spaceshipGame;
         this.gameObjects = gameObjects;
     }
 
+    /**
+     * Spawn a new player object at the given coordinates.
+     * @param xCoord   A float which is the horizontal coordinate
+     * @param yCoord    A float which is the vertical coordinate
+     */
     @Override
     public void spawnNewAt(float xCoord, float yCoord)
     {
@@ -30,20 +43,6 @@ public class PlayerFactory implements IGameObjectFactory
 
             this.gameObjects.addDrawable(this.player, spaceShipLayer);
             this.gameObjects.addPhysicsEntity(this.player.getCollider());
-        }
-    }
-
-    public Player getPlayer()
-    {
-        return this.player;
-    }
-
-    public void deletePlayer()
-    {
-        if (this.player != null)    //Avoid null pointer exceptions!
-        {
-            this.player.setSelfDestructWhenOffScreen();    //Set the object to disappear when off screen.
-            this.player = null; //Delete the player reference.
         }
     }
 }

@@ -31,7 +31,7 @@ public class SpaceshipGame extends GameCore
     private GameObjects gameObjects = new GameObjects();
 
     //Set up classes to handle the in-game logic.
-    private PhysicsEngine physics = new PhysicsEngine(gameObjects.getColliders());
+    private PhysicsEngine physics;
     private EntityUpdateFactory entityUpdateFactory = new EntityUpdateFactory();
     private IGameState gameState;
     private EGameState nextState;
@@ -60,11 +60,17 @@ public class SpaceshipGame extends GameCore
         setVisible(true);
 
         //Register objects with each other.
+        this.physics = new PhysicsEngine(this.gameObjects.getColliders());
         this.gameObjects.setPhysicsEngine(this.physics);
 
         //Load the first game state.
         this.nextState = mainMenu;
         this.loadNextGameState();
+    }
+
+    public IGameState getGameState()
+    {
+        return this.gameState;
     }
 
     /**
@@ -74,16 +80,13 @@ public class SpaceshipGame extends GameCore
      */
     public void prepareToLoadNewGameState(EGameState newState)
     {
-        float horizontalClearanceSpeed = -0.6f;
-        float verticalClearanceSpeed = 0.0f;
+        float horizontalClearanceSpeed = 0.0f;
+        float verticalClearanceSpeed = -0.6f;
 
         this.nextState = newState;
 
         if (this.gameState != null) //If there is already a game state loaded
         {
-            //this.gameState.pause()
-            //this.gameState.addLevelEvent(new ShipManoeuvre());
-            //this.physics.pause();
             this.gameObjects.clearForeground(horizontalClearanceSpeed, verticalClearanceSpeed);
 
             if (!mainMenu.matches(this.gameState))
@@ -93,7 +96,7 @@ public class SpaceshipGame extends GameCore
             }
 
             this.gameState.addLevelEvent(new ShipManoeuvre(horizontalClearanceSpeed, verticalClearanceSpeed, this.entityUpdateFactory), 0);
-            this.gameState.addLevelEvent(new TerminateState(this), 4_000);
+            this.gameState.addLevelEvent(new TerminateState(this), 2_000);
         }
     }
 
@@ -108,6 +111,9 @@ public class SpaceshipGame extends GameCore
         {
             case mainMenu:  this.gameState = new MainMenuState(this); break;
             case levelOne:  this.gameState = new LevelOneGameState(this); break;
+            case levelTwo:  this.gameState = new LevelTwoGameState(this); break;
+            case levelThree:  this.gameState = new LevelThreeGameState(this); break;
+
         }
 
         //Make sure that all states start with no movement or gravity.

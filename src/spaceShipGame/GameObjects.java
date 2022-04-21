@@ -15,14 +15,29 @@ public class GameObjects
 {
     //Set up arrays of in-game objects.
     private ArrayList<IDrawable> starFieldLayer1 = new ArrayList<>();
+    private ArrayList<IDrawable> starFieldLayer1ToAdd = new ArrayList<>();
+
     private ArrayList<IDrawable> starFieldLayer2 = new ArrayList<>();
+    private ArrayList<IDrawable> starFieldLayer2ToAdd = new ArrayList<>();
+
     private ArrayList<IDrawable> starFieldLayer3 = new ArrayList<>();
+    private ArrayList<IDrawable> starFieldLayer3ToAdd = new ArrayList<>();
+
     private ArrayList<IDrawable> spaceStationLayer = new ArrayList<>();
+    private ArrayList<IDrawable> spaceStationLayerToAdd = new ArrayList<>();
+
     private ArrayList<IDrawable> spaceShipLayer = new ArrayList<>();
+    private ArrayList<IDrawable> spaceShipLayerToAdd = new ArrayList<>();
+
     private ArrayList<IDrawable> UILayer = new ArrayList<>();
+    private ArrayList<IDrawable> UILayerToAdd = new ArrayList<>();
 
     private ArrayList<IGameSound> sounds = new ArrayList<>();
+    private ArrayList<IGameSound> soundsToAdd = new ArrayList<>();
+
     private ArrayList<Collider> colliders = new ArrayList<>();
+    private ArrayList<Collider> collidersToAdd = new ArrayList<>();
+
     private PhysicsEngine physicsEngine;
 
     private TileMap tileMap;
@@ -37,7 +52,7 @@ public class GameObjects
     public void addSound(IGameSound sound)
     {
         sound.play();
-        this.sounds.add(sound);
+        this.soundsToAdd.add(sound);
     }
 
     public void setPhysicsEngine(PhysicsEngine engine)
@@ -67,7 +82,7 @@ public class GameObjects
 
     public void addPhysicsEntity(Collider collider)
     {
-        this.colliders.add(collider);
+        this.collidersToAdd.add(collider);
     }
 
     public void addDrawable(LinkedList<IDrawable> drawableList, ERenderLayer layer)
@@ -82,21 +97,21 @@ public class GameObjects
     {
         switch (layer)
         {
-            case UILayer: this.UILayer.add(drawable); break;
-            case spaceShipLayer: this.spaceShipLayer.add(drawable); break;
-            case spaceStationLayer: this.spaceStationLayer.add(drawable); break;
-            case starFieldLayer1: this.starFieldLayer1.add(drawable); break;
-            case starFieldLayer2: this.starFieldLayer2.add(drawable); break;
-            case starFieldLayer3: this.starFieldLayer3.add(drawable); break;
+            case UILayer: this.UILayerToAdd.add(drawable); break;
+            case spaceShipLayer: this.spaceShipLayerToAdd.add(drawable); break;
+            case spaceStationLayer: this.spaceStationLayerToAdd.add(drawable); break;
+            case starFieldLayer1: this.starFieldLayer1ToAdd.add(drawable); break;
+            case starFieldLayer2: this.starFieldLayer2ToAdd.add(drawable); break;
+            case starFieldLayer3: this.starFieldLayer3ToAdd.add(drawable); break;
         }
     }
 
     public void draw(Graphics2D graphics2D)
     {
-        drawLayer(this.starFieldLayer1, graphics2D, false);
-        drawLayer(this.starFieldLayer2, graphics2D, false);
-        drawLayer(this.starFieldLayer3, graphics2D, false);
-        drawLayer(this.spaceStationLayer, graphics2D, false);
+        drawLayer(this.starFieldLayer1, this.starFieldLayer1ToAdd, graphics2D, false);
+        drawLayer(this.starFieldLayer2, this.starFieldLayer2ToAdd, graphics2D, false);
+        drawLayer(this.starFieldLayer3, this.starFieldLayer3ToAdd, graphics2D, false);
+        drawLayer(this.spaceStationLayer, this.spaceStationLayerToAdd, graphics2D, false);
 
         if (this.tileMap != null)
         {
@@ -106,12 +121,16 @@ public class GameObjects
                     (int) (this.playerYOffset + this.tileMapYLocation));
         }
 
-        drawLayer(this.spaceShipLayer, graphics2D, true);
-        drawLayer(this.UILayer, graphics2D, false);
+        drawLayer(this.spaceShipLayer, this.spaceShipLayerToAdd, graphics2D, true);
+        drawLayer(this.UILayer, this.UILayerToAdd, graphics2D, false);
     }
 
-    private void drawLayer(ArrayList<IDrawable> layer, Graphics2D graphics2D, boolean offsetToPlayer)
+    private void drawLayer(ArrayList<IDrawable> layer, ArrayList<IDrawable> toAdd, Graphics2D graphics2D, boolean offsetToPlayer)
     {
+        //Stave off crashes due to concurrent modification.
+        layer.addAll(toAdd);
+        toAdd.clear();
+
         for (IDrawable entity : layer)
         {
             if (offsetToPlayer)
@@ -133,12 +152,12 @@ public class GameObjects
         resolveTileMapSpeeds(updateData.getMillisSinceLastUpdate());
 
         //If there is a physics engine set, and there are physics entities, then do physics updates:
-        if (this.physicsEngine != null && this.colliders.size() > 0)
+        if (this.physicsEngine != null && (this.colliders.size() > 0 || this.collidersToAdd.size() > 0))
         {
-            updatePhysicsObjects(this.colliders, updateData);
+            updatePhysicsObjects(updateData);
         }
 
-        updateSounds(sounds);
+        updateSounds();
 
         updateGraphicsLayer(this.starFieldLayer1, updateData);
         updateGraphicsLayer(this.starFieldLayer2, updateData);
@@ -148,8 +167,12 @@ public class GameObjects
         updateGraphicsLayer(this.UILayer, updateData);
     }
 
-    private void updateSounds(ArrayList<IGameSound> sounds)
+    private void updateSounds()
     {
+        //Do this to stop concurrent modification errors.
+        this.sounds.addAll(this.soundsToAdd);
+        this.soundsToAdd.clear();
+
         LinkedList<IGameSound> entitiesToDelete = new LinkedList<>();
         for (IGameSound sound : sounds)
         {
@@ -172,10 +195,14 @@ public class GameObjects
         return this.colliders;
     }
 
-    private void updatePhysicsObjects(ArrayList<Collider> colliders, EntityUpdate update)
+    private void updatePhysicsObjects(EntityUpdate update)
     {
+        //Do this to stop concurrent modification errors.
+        this.colliders.addAll(this.collidersToAdd);
+        this.collidersToAdd.clear();
+
         LinkedList<Collider> collidersToDelete = new LinkedList<>();
-        for (Collider collider : colliders)
+        for (Collider collider : this.colliders)
         {
             //Delete background entities that have travelled off screen.
             if (collider.getSelfDestructStatus())
@@ -184,7 +211,7 @@ public class GameObjects
             }
         }
 
-        colliders.removeAll(collidersToDelete);
+        this.colliders.removeAll(collidersToDelete);
 
         physicsEngine.update(update);
     }

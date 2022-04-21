@@ -19,7 +19,7 @@ import java.util.LinkedList;
 import static spaceShipGame.GameObjects.ERenderLayer.*;
 import static helperClasses.TilemapHelper.ETileType.*;
 
-public class LevelOneGameState implements IGameState, KeyListener
+public class LevelThreeGameState implements IGameState, KeyListener
 {
     private SpaceshipGame spaceshipGame;
     private EntityUpdateFactory updateFactory;
@@ -39,14 +39,14 @@ public class LevelOneGameState implements IGameState, KeyListener
     private LinkedList<ILevelEvent> levelEvents = new LinkedList<>();
     private LinkedList<ILevelEvent> levelEventsToAdd = new LinkedList<>();
 
-    public LevelOneGameState(SpaceshipGame spaceshipGame)
+    public LevelThreeGameState(SpaceshipGame spaceshipGame)
     {
         this.spaceshipGame = spaceshipGame;
         this.updateFactory = this.spaceshipGame.getEntityUpdateFactory();
         this.gameObjects = this.spaceshipGame.getGameObjects();
         this.physicsEngine = this.spaceshipGame.getPhysics();
 
-        this.tileMap.loadMap("maps", "SpaceShipOne.txt");
+        this.tileMap.loadMap("maps", "SpaceShipThree.txt");
         this.physicsEngine.setTileMap(this.tileMap);
 
         this.playerFactory = new PlayerFactory(this.spaceshipGame, this.gameObjects);

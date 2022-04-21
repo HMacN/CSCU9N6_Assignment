@@ -91,6 +91,11 @@ public class PhysicsEngine
             }
 
             //The two colliders must be overlapping to have got this far.
+
+            //Tell the colliders parents what they've hit.
+            collider.hasCollidedWith(otherCollider.getParent());
+            otherCollider.hasCollidedWith(collider.getParent());
+
             stopColliderOverlapsAndHandleImpulseTransfer(collider, otherCollider);
 
             //No other colliders should be able to collide with this one during this update.
@@ -117,10 +122,6 @@ public class PhysicsEngine
             //Only handle vertical impulse.
             processVerticalImpulseTransfer(collider, otherCollider);
         }
-
-        //Tell the colliders parents what they've hit.
-        collider.hasCollidedWith(otherCollider.getParent());
-        otherCollider.hasCollidedWith(collider.getParent());
     }
 
     private float findDistanceToMoveVerticallyToEscapeCollision(Collider collider, Collider otherCollider)

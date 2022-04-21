@@ -64,7 +64,8 @@ public class TilemapHelper
         cargoCrate('c'),
         hull('X'),
         ladder('l'),
-        gravLift('^')
+        gravLift('^'),
+        monster('M'),
         ;
 
         private final char tileType;

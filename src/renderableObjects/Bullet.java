@@ -126,6 +126,6 @@ public class Bullet implements IDrawable, IHasCollider
     {
         this.sprite.hide();
         this.collider.setToSelfDestruct();
-        this.gameObjects.addSound(new DistanceSound("sounds/zap.wav", this.gameObjects, this.spaceshipGame, this.collider));
+        this.gameObjects.addSound(new DistanceSound("sounds/zap.wav", this.spaceshipGame, this.collider));
     }
 }

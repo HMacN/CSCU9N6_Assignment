@@ -1,7 +1,6 @@
 package renderableObjects;
 
 import CSCU9N6Library.Sprite;
-import helperClasses.Debug;
 import helperClasses.EntityUpdate;
 import factories.SpriteFactory;
 import physics.Collider;
@@ -40,8 +39,6 @@ public class CargoCrate implements IDrawable, IHasCollider
             this.sprite.setX(this.sprite.getX() + xOffset);
             this.sprite.setY(this.sprite.getY() + yOffset);
         }
-
-
 
         //Draw the sprite.
         this.sprite.drawTransformed(graphics2D);

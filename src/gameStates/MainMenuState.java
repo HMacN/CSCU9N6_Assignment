@@ -2,6 +2,7 @@ package gameStates;
 
 import CSCU9N6Library.Sound;
 import factories.EntityUpdateFactory;
+import factories.LevelEventFactory;
 import factories.SpriteFactory;
 import helperClasses.*;
 import levelEvents.*;
@@ -13,6 +14,7 @@ import soundsAndMusic.MIDIPlayer;
 import spaceShipGame.GameObjects;
 import spaceShipGame.SpaceshipGame;
 
+import javax.sound.midi.MidiChannel;
 import java.util.LinkedList;
 
 import static spaceShipGame.GameObjects.ERenderLayer.*;
@@ -26,6 +28,7 @@ public class MainMenuState implements IGameState
     private MIDIPlayer backgroundMusic;
     private UserInputHandler inputHandler;
     private SpaceshipGame spaceshipGame;
+    private LevelEventFactory eventFactory;
 
     private GameButton levelOneButton;
     private GameButton levelTwoButton;
@@ -49,19 +52,13 @@ public class MainMenuState implements IGameState
         this.SCREEN_HEIGHT = this.spaceshipGame.getScreenHeight();
         this.inputHandler = this.spaceshipGame.getUserInputHandler();
         this.updateFactory = this.spaceshipGame.getEntityUpdateFactory();
+        this.eventFactory = new LevelEventFactory(this.spaceshipGame);
 
         //Set up the menu.
-        //this.gameObjects.addDrawable(getLaunchPad(), spaceStationLayer);
 
         this.levelOneButton = getLevel1Button();
-        //TODO Other buttons.
-        //this.levelTwoButton = getLevel1Button();
-        //this.levelThreeButton = getLevel1Button();
-
-        //this.gameObjects.addDrawable(this.levelOneButton, UILayer);
-        //TODO Other buttons.
-        //this.gameObjects.addDrawable(this.levelTwoButton, UILayer);
-        //this.gameObjects.addDrawable(this.levelThreeButton, UILayer);
+        this.levelTwoButton = getLevel2Button();
+        this.levelThreeButton = getLevel3Button();
 
         //Start playing background music.
         this.backgroundMusic = new MIDIPlayer("sounds/theme.mid");
@@ -80,11 +77,15 @@ public class MainMenuState implements IGameState
 
     private void addLevelEvents()
     {
-        addLevelEvent(new DisplayDrawable(getLaunchPad(), this.gameObjects, spaceStationLayer), 0);
-        addLevelEvent(new PlaySound(new MIDIPlayer("theme.mid"), this.gameObjects), 0);
+        this.eventFactory.setGameState(this);
 
-        addLevelEvent(new DisplayDrawable(this.levelOneButton, this.gameObjects, UILayer), 2_000);
-        addLevelEvent(new ShipManoeuvre(0.0f, -0.1f, this.updateFactory), 2_000);
+        eventFactory.addDisplayDrawableEvent(getLaunchPad(), spaceStationLayer, 0);
+        eventFactory.addPlaySoundEvent(new MIDIPlayer("theme.mid"), 0);
+
+        eventFactory.addDisplayDrawableEvent(this.levelOneButton, UILayer, 2_000);
+        eventFactory.addDisplayDrawableEvent(this.levelTwoButton, UILayer, 2_000);
+        eventFactory.addDisplayDrawableEvent(this.levelThreeButton, UILayer, 2_000);
+        eventFactory.addShipManoeuvreEvent(0.0f, -0.1f, 2_000);
     }
 
     private void handleLevelEvents()
@@ -93,6 +94,7 @@ public class MainMenuState implements IGameState
 
         //Do it this bloody stupid way because otherwise Java throws a concurrentModificationException.
         this.levelEvents.addAll(this.levelEventsToAdd);
+        this.levelEventsToAdd.clear();
 
         for (ILevelEvent event : this.levelEvents)
         {
@@ -152,6 +154,28 @@ public class MainMenuState implements IGameState
         return button;
     }
 
+    private GameButton getLevel2Button()
+    {
+        Sprite pressedSprite = SpriteFactory.getSpriteFromPNGFile("Level2Button");
+        Sprite unPressedSprite = SpriteFactory.getSpriteFromPNGFile("Level2ButtonPressed");
+        GameButton button = new GameButton(SCREEN_WIDTH, SCREEN_HEIGHT, pressedSprite, unPressedSprite, this.inputHandler, new ButtonTwoFunctionObject(this, this.spaceshipGame));
+        button.setXCoord(260.0f);
+        button.setYCoord(400.0f);
+
+        return button;
+    }
+
+    private GameButton getLevel3Button()
+    {
+        Sprite pressedSprite = SpriteFactory.getSpriteFromPNGFile("Level3Button");
+        Sprite unPressedSprite = SpriteFactory.getSpriteFromPNGFile("Level3ButtonPressed");
+        GameButton button = new GameButton(SCREEN_WIDTH, SCREEN_HEIGHT, pressedSprite, unPressedSprite, this.inputHandler, new ButtonThreeFunctionObject(this, this.spaceshipGame));
+        button.setXCoord(260.0f);
+        button.setYCoord(600.0f);
+
+        return button;
+    }
+
     private static class ButtonOneFunctionObject implements IButtonFunctionObject
     {
         MainMenuState mainMenuState;
@@ -167,6 +191,44 @@ public class MainMenuState implements IGameState
         public void onButtonPress()
         {
             this.mainMenuState.addLevelEvent(new PrepareToEndLevel(this.spaceshipGame, EGameState.levelOne), 500);
+            this.mainMenuState.addLevelEvent(new PlaySound(new Sound("sounds/buttonClick.wav"), this.spaceshipGame.getGameObjects()), 0);
+        }
+    }
+
+    private static class ButtonTwoFunctionObject implements IButtonFunctionObject
+    {
+        MainMenuState mainMenuState;
+        SpaceshipGame spaceshipGame;
+
+        ButtonTwoFunctionObject(MainMenuState mainMenuState, SpaceshipGame spaceshipGame)
+        {
+            this.mainMenuState = mainMenuState;
+            this.spaceshipGame = spaceshipGame;
+        }
+
+        @Override
+        public void onButtonPress()
+        {
+            this.mainMenuState.addLevelEvent(new PrepareToEndLevel(this.spaceshipGame, EGameState.levelTwo), 500);
+            this.mainMenuState.addLevelEvent(new PlaySound(new Sound("sounds/buttonClick.wav"), this.spaceshipGame.getGameObjects()), 0);
+        }
+    }
+
+    private static class ButtonThreeFunctionObject implements IButtonFunctionObject
+    {
+        MainMenuState mainMenuState;
+        SpaceshipGame spaceshipGame;
+
+        ButtonThreeFunctionObject(MainMenuState mainMenuState, SpaceshipGame spaceshipGame)
+        {
+            this.mainMenuState = mainMenuState;
+            this.spaceshipGame = spaceshipGame;
+        }
+
+        @Override
+        public void onButtonPress()
+        {
+            this.mainMenuState.addLevelEvent(new PrepareToEndLevel(this.spaceshipGame, EGameState.levelThree), 500);
             this.mainMenuState.addLevelEvent(new PlaySound(new Sound("sounds/buttonClick.wav"), this.spaceshipGame.getGameObjects()), 0);
         }
     }

@@ -5,9 +5,13 @@ import CSCU9N6Library.TileMap;
 import factories.BulletFactory;
 import factories.EntityUpdateFactory;
 import factories.SpriteFactory;
+import gameStates.EGameState;
+import gameStates.IGameState;
 import helperClasses.*;
+import levelEvents.PrepareToEndLevel;
 import physics.Collider;
 import physics.IHasCollider;
+import soundsAndMusic.DistanceSound;
 import spaceShipGame.SpaceshipGame;
 
 import java.awt.*;
@@ -33,7 +37,10 @@ public class Player implements IDrawable, KeyListener, IHasCollider
     private BulletFactory bulletFactory;
     private UserInputHandler inputHandler;
     private TileMap tileMap;
+    private SpaceshipGame spaceshipGame;
+    private IGameState level;
 
+    private boolean dead = false;
     private boolean upKeyPressed = false;
     private boolean downKeyPressed = false;
     private boolean leftKeyPressed = false;
@@ -42,10 +49,12 @@ public class Player implements IDrawable, KeyListener, IHasCollider
 
     public Player(SpaceshipGame spaceshipGame, float xCoord, float yCoord)
     {
+        this.spaceshipGame = spaceshipGame;
         this.screenHeight = spaceshipGame.getScreenHeight();
         this.screenWidth = spaceshipGame.getScreenWidth();
         this.startingX = screenWidth / 2.0f;
         this.startingY = screenHeight / 2.0f;
+        this.level = this.spaceshipGame.getGameState();
 
         this.movingSprite.setX(this.startingX);
         this.movingSprite.setY(this.startingY);
@@ -67,6 +76,15 @@ public class Player implements IDrawable, KeyListener, IHasCollider
     public Collider getCollider()
     {
         return collider;
+    }
+
+    private void die()
+    {
+        this.dead = true;
+        this.sprite.hide();
+        this.collider.setToSelfDestruct();
+        this.spaceshipGame.getGameObjects().addSound(new DistanceSound("sounds/splat.wav", this.spaceshipGame, this.collider));
+        this.level.addLevelEvent(new PrepareToEndLevel(this.spaceshipGame, EGameState.mainMenu), 0);
     }
 
     @Override
@@ -197,6 +215,11 @@ public class Player implements IDrawable, KeyListener, IHasCollider
     @Override
     public boolean getSelfDestructWhenOffScreen()
     {
+        if (this.dead)
+        {
+            return true;
+        }
+
         if (!this.selfDestructWhenOffScreen)
         {
             return false;   //Don't self destruct without being told to do so.
@@ -376,7 +399,10 @@ public class Player implements IDrawable, KeyListener, IHasCollider
     @Override
     public void hasCollidedWith(Object object)
     {
-
+        if (object.getClass().equals(AlienBugMonster.class) || object.getClass().equals(Bullet.class))
+        {
+            die();
+        }
     }
 
     @Override

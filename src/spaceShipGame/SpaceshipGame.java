@@ -92,6 +92,7 @@ public class SpaceshipGame extends GameCore
         float verticalClearanceSpeed = -0.6f;
 
         this.nextState = newState;
+        this.playerFactory = new PlayerFactory(this, this.gameObjects);
 
         if (this.gameState != null) //If there is already a game state loaded
         {

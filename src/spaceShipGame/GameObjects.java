@@ -286,7 +286,7 @@ public class GameObjects
     }
 
     /**
-     * Sets all current colliders to self destruct, to be removed in the next update cycle.
+     * Sets all current colliders to self destruct, and then updates them so that they go.
      */
     public void clearPhysicsObjects()
     {

@@ -107,7 +107,7 @@ public class StarFieldGenerator
     private void configureStarLocationIfSpaceshipTravellingInXAxis(BackgroundEntity star)
     {
         star.setYCoord(random.nextInt(this.entityUpdate.getScreenHeight()));
-        
+
         if (star.getXSpeed() < 0)
         {
             star.setXCoord(this.entityUpdate.getScreenWidth());

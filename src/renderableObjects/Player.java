@@ -116,7 +116,7 @@ public class Player implements IDrawable, KeyListener, IHasCollider
     @Override
     public void draw(Graphics2D graphics2D, float xOffset, float yOffset)
     {
-        //Draw the sprite.
+        //Draw the sprite, ignoring the offsets (everything else is offset to this).
         this.sprite.drawTransformed(graphics2D);
     }
 
@@ -196,7 +196,7 @@ public class Player implements IDrawable, KeyListener, IHasCollider
                 this.sprite = this.stillSprite;
                 this.sprite.setScale(0.7f, 0.7f);
                 this.collider.setXControlSpeed(0.0f);
-                this.collider.setYControlSpeed(-1 * this.controlAuthority);
+                this.collider.setYControlSpeed(-2 * this.controlAuthority);
                 break;
             }
             case goingDown:
@@ -204,7 +204,7 @@ public class Player implements IDrawable, KeyListener, IHasCollider
                 this.sprite = this.stillSprite;
                 this.sprite.setScale(0.7f, 0.7f);
                 this.collider.setXControlSpeed(0.0f);
-                this.collider.setYControlSpeed(this.controlAuthority);
+                this.collider.setYControlSpeed(2 * this.controlAuthority);
                 break;
             }
         }

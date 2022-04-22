@@ -49,7 +49,7 @@ public class Bullet implements IDrawable, IHasCollider
         this.sprite.playAnimation();
         this.sprite.show();
 
-        this.collider = new Collider(xCoord, yCoord, 8.0f, 8.0f, -1.0f, this);  //Negative mass!  Ray Gun bullets can "pull" things.
+        this.collider = new Collider(xCoord, yCoord, 8.0f, 8.0f, -2.0f, this);  //Negative mass!  Ray Gun bullets can "pull" things.
         this.collider.setXSpeed(xSpeed);
         this.collider.setYSpeed(ySpeed);
         this.collider.setIgnoringFriction(true);

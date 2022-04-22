@@ -1,6 +1,5 @@
 package renderableObjects;
 
-import CSCU9N6Library.Sound;
 import CSCU9N6Library.Sprite;
 import factories.SpriteFactory;
 import helperClasses.EntityUpdate;
@@ -111,7 +110,7 @@ public class Bullet implements IDrawable, IHasCollider
     }
 
     @Override
-    public void hasCollidedWith(Object object)
+    public void hasCollidedWith(IHasCollider parentOfOtherCollider)
     {
         handleHittingSomething();
     }

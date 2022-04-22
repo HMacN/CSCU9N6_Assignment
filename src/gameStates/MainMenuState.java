@@ -120,7 +120,7 @@ public class MainMenuState implements IGameState
             }
             else
             {
-                event.setCurrentTime(this.millisInState);
+                event.updateCurrentTime(this.millisInState);
             }
         }
 

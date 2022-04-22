@@ -8,15 +8,24 @@ import renderableObjects.IDrawable;
 import java.util.LinkedList;
 import java.util.Random;
 
+/**
+ * Creates a large number of BackgroundEntities (stars) and sets them around the edge of the screen in such a way that they appear to move past the ship as it travels.
+ * Creates three layers of stars, in order to provide a sense of depth.  Maintains a set density of starfield regardless of the spacecraft speed.
+ */
 public class StarFieldGenerator
 {
-    private final long PIXELS_PER_STAR = 4_000;
+    private final long PIXELS_PER_STAR = 4_000; //The density of the starfield.  Used to keep the number of stars on screen constant.
     private EntityUpdate entityUpdate;
     private Random random = new Random();
     private long leftOverAreaToAddToNextUpdate;
     private float parallax;
 
-
+    /**
+     * Creates a list of the stars to add to GameObjects
+     * @param entityUpdate  An EntityUpdate object to interrogate for data
+     * @param parallax  A float which is the amount the speed should be changed in order to give the illusion of depth.
+     * @return  A LinkedList<IDrawable> which contains the stars to add to the background.
+     */
     public LinkedList<IDrawable> spawnBackgroundStars(EntityUpdate entityUpdate, float parallax)
     {
         this.entityUpdate = entityUpdate;
@@ -48,6 +57,12 @@ public class StarFieldGenerator
         return listOfStars;
     }
 
+    /**
+     * Creates a star (BackgroundEntity) to be added to the game.
+     * @param screenWidth   An int which is the width of the display area in pixels
+     * @param screenHeight  An int which is the height of the display area in pixels
+     * @return
+     */
     private BackgroundEntity generateRandomStar(int screenWidth, int screenHeight)
     {
         //Instantiate background entity.
@@ -64,12 +79,20 @@ public class StarFieldGenerator
         return starToReturn;
     }
 
+    /**
+     * Works out what speeds the new star should be going at, and sets them
+     * @param star  A BackgroundEntity object which is to have its horizontal and vertical speeds set.
+     */
     private void configureStarSpeed(BackgroundEntity star)
     {
         star.setXSpeed(-this.entityUpdate.getSpaceshipXSpeed());
         star.setYSpeed(-this.entityUpdate.getSpaceshipYSpeed());
     }
 
+    /**
+     * Works out which side of the screen to spawn the star on if the spaceship is travelling horizontally.  The y-axis coordinate is assigned a random number.
+     * @param star  A BackgroundEntity object which is to have it's initial location set.
+     */
     private void configureStarLocationIfSpaceshipTravellingInXAxis(BackgroundEntity star)
     {
         star.setYCoord(random.nextInt(this.entityUpdate.getScreenHeight()));
@@ -84,6 +107,10 @@ public class StarFieldGenerator
         }
     }
 
+    /**
+     * Works out which side of the screen to spawn the star on if the spaceship is travelling vertically.  The x-axis coordinate is assigned a random number.
+     * @param star  A BackgroundEntity object which is to have it's initial location set.
+     */
     private void configureStarLocationIfSpaceshipTravellingInYAxis(BackgroundEntity star)
     {
         star.setXCoord(random.nextInt(this.entityUpdate.getScreenWidth()));
@@ -98,17 +125,32 @@ public class StarFieldGenerator
         }
     }
 
+    /**
+     * Works out how many stars to spawn on the left and right edges of the display area if the ship is moving horizontally.
+     * @return  An integer which is the number of stars to spawn on the left and right edges of the screen this update.
+     */
     private int starsToSpawnIfSpaceshipIsTravellingInTheXAxis()
     {
         return numberOfStarsToSpawnOnAxis(this.entityUpdate.getSpaceshipXSpeed(), this.entityUpdate.getScreenHeight());
     }
 
+    /**
+     * Works out how many stars to spawn on the top and bottom edges of the display area if the ship is moving horizontally.
+     * @return  An integer which is the number of stars to spawn on the top and bottom edges of the screen this update.
+     */
     private int starsToSpawnIfSpaceshipIsTravellingInTheYAxis()
     {
         return numberOfStarsToSpawnOnAxis(this.entityUpdate.getSpaceshipYSpeed(), this.entityUpdate.getScreenWidth());
     }
 
-    private int numberOfStarsToSpawnOnAxis(float axisSpeed, int crossAxisLength)
+    /**
+     * Given a speed, and knowing the desired starfield density, work out how many stars to spawn to cover the newly rendered area with stars.
+     * Called once for each of the two axes of movement of the spaceship.
+     * @param axisSpeed A float which is the speed (in pixels per millisecond) of the spaceship.
+     * @param widthOfNewArea   An int which is the width of the display area edge the ship is moving towards.
+     * @return  An int which is the number of new stars required to maintain starfield density.
+     */
+    private int numberOfStarsToSpawnOnAxis(float axisSpeed, int widthOfNewArea)
     {
         int axisDistance;
         long areaExposed;
@@ -122,8 +164,8 @@ public class StarFieldGenerator
             axisDistance = axisDistance * -1;
         }
 
-        //Multiply this by the screen width to get the area to fill with stars.
-        areaExposed = crossAxisLength * axisDistance;
+        //Multiply this by the other axis length to get the area to fill with stars.
+        areaExposed = widthOfNewArea * axisDistance;
 
         //Save area that isn't filled with stars for next time.
         this.leftOverAreaToAddToNextUpdate = (areaExposed + this.leftOverAreaToAddToNextUpdate) % (PIXELS_PER_STAR);

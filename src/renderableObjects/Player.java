@@ -397,9 +397,9 @@ public class Player implements IDrawable, KeyListener, IHasCollider
     }
 
     @Override
-    public void hasCollidedWith(Object object)
+    public void hasCollidedWith(IHasCollider parentOfOtherCollider)
     {
-        if (object.getClass().equals(AlienBugMonster.class) || object.getClass().equals(Bullet.class))
+        if (parentOfOtherCollider.getClass().equals(AlienBugMonster.class) || parentOfOtherCollider.getClass().equals(Bullet.class))
         {
             die();
         }

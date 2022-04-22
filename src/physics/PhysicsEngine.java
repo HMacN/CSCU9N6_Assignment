@@ -6,31 +6,49 @@ import helperClasses.TilemapHelper;
 
 import java.util.ArrayList;
 
+/**
+ * The class used to do all physics calculations in the game.  Contains an arraylist of colliders which have their collision detection done each update.
+ */
 public class PhysicsEngine
 {
     private ArrayList<Collider> colliders;
     private TileMap tileMap;
     private float xAxisGravityPerMilli = 0.000_0f;
     private float yAxisGravityPerMilli = 0.000_3f;
-    private float frictionChangePerMilli = 0.000_4f;
-    private float minimumSpeed = 0.01f;
-    private float speedLossDueToTileMapCollision = 0.3f;
-    private float constantOfElasticity = 0.9f;
+    private float frictionChangePerMilli = 0.000_4f;        //Change in speed for colliders due to general friction.
+    private float minimumSpeed = 0.001f;                     //A minimum speed for the colliders.
+    private float speedLossDueToTileMapCollision = 0.3f;    //Factor for how much speed should an object lose when it hits a tile.
+    private float constantOfElasticity = 0.9f;              //Factor used in collider-on-collider calculations.
 
+    /**
+     * The constructor.
+     * @param colliders     An ArrayList of colliders which will be the subjects of the physics calculations each update.
+     */
     public PhysicsEngine(ArrayList<Collider> colliders)
     {
         this.colliders = colliders;
     }
 
+    /**
+     * Sets the TileMap to be used for detecting tile collisions.
+     * @param tileMap   A TileMap object which is the tilemap to use for detecting tile collisions.
+     */
     public void setTileMap(TileMap tileMap)
     {
         this.tileMap = tileMap;
     }
 
+    /**
+     * Performs all the physics calculations for an update cycle.
+     * @param update    An EntityUpdate object which contains all the data for this update cycle.
+     */
     public void update(EntityUpdate update)
     {
-        //Work out how much the speed should be reduced by.
-        float frictionChangeFactor = this.frictionChangePerMilli * update.getMillisSinceLastUpdate();
+        //No colliders have had their collisions handled this update cycle.
+        for (Collider unhandledCollider : this.colliders)
+        {
+            unhandledCollider.setCollisionsHandled(false);
+        }
 
         //Work out x and y axis accelerations.
         float xAxisGravitySpeedChange = this.xAxisGravityPerMilli * update.getMillisSinceLastUpdate();
@@ -48,7 +66,7 @@ public class PhysicsEngine
 
             //Handle environmental effects.
             handleGravity(collider, xAxisGravitySpeedChange, yAxisGravitySpeedChange);
-            handleFriction(collider, frictionChangeFactor);
+            handleFriction(collider, update.getMillisSinceLastUpdate());
 
             //Now move colliders based on their control input.
             collider.setXCoord(collider.getXCoord() + collider.getXControlSpeed() * update.getMillisSinceLastUpdate());
@@ -56,14 +74,19 @@ public class PhysicsEngine
         }
     }
 
+    /**
+     * Iterates over the list of colliders and handles any collisions between them.
+     * Colliders which have been handled are skipped, as they should already have had all of their collisions resolved.
+     *
+     * Performs "bounding rects" collision detection.  Other layers of collision detection were considered, but the
+     * current calculation is so simple that implementing other systems would have slowed the process down.  The colliders
+     * are only ever upright rectangles, so this was felt to be sufficient for the detail of the collision detection
+     * system, while also being as simple as possible.
+     *
+     * @param collider  The Collider object whose collisions for this update cycle are to be resolved.
+     */
     private void checkForAndHandleColliderCollisions(Collider collider)
     {
-        //No colliders have had their collisions handled.
-        for (Collider unhandledCollider : this.colliders)
-        {
-            unhandledCollider.setCollisionsHandled(false);
-        }
-
         for (Collider otherCollider : this.colliders)
         {
             //Check that the other collider has not already been handled.
@@ -96,6 +119,7 @@ public class PhysicsEngine
             collider.hasCollidedWith(otherCollider.getParent());
             otherCollider.hasCollidedWith(collider.getParent());
 
+            //Actually process the physics of the collision.
             stopColliderOverlapsAndHandleImpulseTransfer(collider, otherCollider);
 
             //No other colliders should be able to collide with this one during this update.
@@ -103,6 +127,13 @@ public class PhysicsEngine
         }
     }
 
+    /**
+     * Move two overlapping colliders so that they no longer overlap, and call the appropriate impulse transfer function.
+     * Moves the collider by the shortest horizontal or vertical distance to escape the collision.
+     * Impulse is only transferred along one axis at a time, in order to stop the colliders "sticking" to each other.
+     * @param collider  The collider whose collisions are being processed.
+     * @param otherCollider A collider that the current collider has collided with.
+     */
     private void stopColliderOverlapsAndHandleImpulseTransfer(Collider collider, Collider otherCollider)
     {
         float horizontalDistance = findDistanceToMoveHorizontallyToEscapeCollision(collider, otherCollider);
@@ -124,6 +155,12 @@ public class PhysicsEngine
         }
     }
 
+    /**
+     * Works out the shortest distance to move vertically in order to escape the collision.
+     * @param collider  The collider whose collisions are being processed.
+     * @param otherCollider A collider that the current collider has collided with.
+     * @return  A float which describes the shortest vertical distance to move the collider to escape the collision.
+     */
     private float findDistanceToMoveVerticallyToEscapeCollision(Collider collider, Collider otherCollider)
     {
         //Work out which is further up.
@@ -142,6 +179,12 @@ public class PhysicsEngine
         return distanceToMove;
     }
 
+    /**
+     * Works out the shortest distance to move horizontally in order to escape the collision.
+     * @param collider  The collider whose collisions are being processed.
+     * @param otherCollider A collider that the current collider has collided with.
+     * @return  A float which describes the shortest horizontal distance to move the collider to escape the collision.
+     */
     private float findDistanceToMoveHorizontallyToEscapeCollision(Collider collider, Collider otherCollider)
     {
         //Work out which is further to the left.
@@ -160,6 +203,11 @@ public class PhysicsEngine
         return distanceToMove;
     }
 
+    /**
+     * Performs the impulse transfer calculations between the two colliders in the vertical axis.
+     * @param collider  The collider whose collisions are being processed.
+     * @param otherCollider A collider that the current collider has collided with.
+     */
     private void processVerticalImpulseTransfer(Collider collider, Collider otherCollider)
     {
         //Calculate difference in speeds.
@@ -174,8 +222,8 @@ public class PhysicsEngine
         float otherColliderVerticalSpeedChange = verticalImpulse * otherCollider.getInverseMass();  //Positive due to signage: otherCollider is gaining impulse form being hit.
 
         //If speed changes are too small, discard them.
-        colliderVerticalSpeedChange = discardSmallSpeedChange(0.001f, colliderVerticalSpeedChange);
-        otherColliderVerticalSpeedChange = discardSmallSpeedChange(0.001f, otherColliderVerticalSpeedChange);
+        colliderVerticalSpeedChange = discardSmallSpeedChange(colliderVerticalSpeedChange);
+        otherColliderVerticalSpeedChange = discardSmallSpeedChange(otherColliderVerticalSpeedChange);
 
 
         //Apply vertical speed changes.
@@ -183,6 +231,11 @@ public class PhysicsEngine
         otherCollider.setYSpeed(otherCollider.getYSpeed() + otherColliderVerticalSpeedChange);
     }
 
+    /**
+     * Performs the impulse transfer calculations between the two colliders in the horizontal axis.
+     * @param collider  The collider whose collisions are being processed.
+     * @param otherCollider A collider that the current collider has collided with.
+     */
     private void processHorizontalImpulseTransfer(Collider collider, Collider otherCollider)
     {
         //Calculate difference in speeds.
@@ -196,17 +249,22 @@ public class PhysicsEngine
         float otherColliderHorizontalSpeedChange = horizontalImpulse * otherCollider.getInverseMass();  //Positive due to signage: otherCollider is gaining impulse form being hit.
 
         //If speed changes are too small, discard them.
-        colliderHorizontalSpeedChange = discardSmallSpeedChange(0.001f, colliderHorizontalSpeedChange);
-        otherColliderHorizontalSpeedChange = discardSmallSpeedChange(0.001f, otherColliderHorizontalSpeedChange);
+        colliderHorizontalSpeedChange = discardSmallSpeedChange(colliderHorizontalSpeedChange);
+        otherColliderHorizontalSpeedChange = discardSmallSpeedChange(otherColliderHorizontalSpeedChange);
 
         //Apply horizontal speed changes.
         collider.setXSpeed(collider.getXSpeed() + colliderHorizontalSpeedChange);
         otherCollider.setXSpeed(otherCollider.getXSpeed() + otherColliderHorizontalSpeedChange);
     }
 
-    private float discardSmallSpeedChange(float minimumSpeed, float speed)
+    /**
+     * Works out if the given speed is below the set minimum speed, and sets it to zero if so.
+     * @param speed A float which represents a speed to be checked that it is above the minimum.
+     * @return  A float which is the given speed, which will have been set to zero if it is below the minimum.
+     */
+    private float discardSmallSpeedChange(float speed)
     {
-        if (speed < minimumSpeed && speed > -minimumSpeed)
+        if (speed < this.minimumSpeed && speed > -this.minimumSpeed)
         {
             speed = 0.0f;
         }
@@ -214,6 +272,12 @@ public class PhysicsEngine
         return speed;
     }
 
+    /**
+     * Works out if two colliders overlap on the vertical axis.
+     * @param collider  The collider whose collisions are being processed.
+     * @param otherCollider A collider that the current collider has collided with.
+     * @return  A boolean which is false if the two colliders overlap on the vertical axis.
+     */
     private boolean verticalDistanceBetweenCentroidsIsGreaterThanCombinedHalfHeights(Collider collider, Collider otherCollider)
     {
         float verticalDistance = Math.abs(collider.getYAxisCentroid() - otherCollider.getYAxisCentroid());  //Distance between centres of colliders.
@@ -227,6 +291,12 @@ public class PhysicsEngine
         return false;
     }
 
+    /**
+     * Works out if two colliders overlap on the horizontal axis.
+     * @param collider  The collider whose collisions are being processed.
+     * @param otherCollider A collider that the current collider has collided with.
+     * @return  A boolean which is false if the two colliders overlap on the horizontal axis.
+     */
     private boolean horizontalDistanceBetweenCentroidsIsGreaterThanCombinedHalfWidths(Collider collider, Collider otherCollider)
     {
         float horizontalDistance = Math.abs(collider.getXAxisCentroid() - otherCollider.getXAxisCentroid());  //Distance between centres of colliders.
@@ -240,6 +310,10 @@ public class PhysicsEngine
         return false;
     }
 
+    /**
+     * Makes sure that the colliders horizontal and vertical speeds are above the minimum speed.
+     * @param collider  A Collider object to be checked for compliance with the minimum speed limit.
+     */
     private void handleMinimumSpeed(Collider collider)
     {
         if (collider.getXSpeed() < this.minimumSpeed && collider.getXSpeed() > -this.minimumSpeed)
@@ -253,7 +327,12 @@ public class PhysicsEngine
         }
     }
 
-    private void handleFriction(Collider collider, float frictionChangeFactor)
+    /**
+     * Computes and applies how much to reduce the speed of a collider based on the environmental friction.
+     * @param collider  The Collider to perform friction calculations for.
+     * @param millisSinceLastUpdate A long which is the milliseconds that have passed since the last update cycle.
+     */
+    private void handleFriction(Collider collider, long millisSinceLastUpdate)
     {
         if (collider.isIgnoringFriction())  //Ignore this collider if it ignores friction.
         {
@@ -261,10 +340,16 @@ public class PhysicsEngine
         }
 
         //Apply an amount of friction so that objects come to a stop.
-        collider.setYSpeed(collider.getYSpeed() * (1 - frictionChangeFactor));
-        collider.setXSpeed(collider.getXSpeed() * (1 - frictionChangeFactor));
+        collider.setYSpeed(collider.getYSpeed() * (1 - (this.frictionChangePerMilli * millisSinceLastUpdate)));
+        collider.setXSpeed(collider.getXSpeed() * (1 - (this.frictionChangePerMilli * millisSinceLastUpdate)));
     }
 
+    /**
+     * Computes and applies how much to change the speeds of a collider based on the force of gravity.
+     * @param collider  The collider to perform gravity calculations for.
+     * @param xAxisGravityAcceleration  The horizontal speed increase in pixels per millisecond to apply to the collider.
+     * @param yAxisGravityAcceleration  The vertical speed increase in pixels per millisecond to apply to the collider.
+     */
     private void handleGravity(Collider collider, float xAxisGravityAcceleration, float yAxisGravityAcceleration)
     {
         if (collider.isIgnoringGravity() || collider.getInverseMass() <= 0) //If the collider is ignoring gravity, or shouldn't be affected by it:
@@ -282,12 +367,21 @@ public class PhysicsEngine
         }
     }
 
+    /**
+     * Setter for the gravity on the spaceship.
+     * @param xAxisGravityPerMilli  The new horizontal acceleration due to gravity.
+     * @param yAxisGravityPerMilli  The new vertical acceleration due to gravity.
+     */
     public void setGravity(float xAxisGravityPerMilli, float yAxisGravityPerMilli)
     {
         this.xAxisGravityPerMilli = xAxisGravityPerMilli;
         this.yAxisGravityPerMilli = yAxisGravityPerMilli;
     }
 
+    /**
+     * Performs all calculations related to tile map collisions for the given collider.
+     * @param collider  The Collider object to process tilemap collisions for.
+     */
     public void checkForAndHandleTilemapCollisions(Collider collider)
     {
         // Take a note of a sprite's current position
@@ -305,12 +399,20 @@ public class PhysicsEngine
         //If there is a collision, handle it, otherwise return.
         if (collidingTopLeft || collidingTopRight || collidingBottomLeft || collidingBottomRight)
         {
-            handleTileMapCollisionForEntity(collider, collidingTopLeft, collidingTopRight, collidingBottomLeft, collidingBottomRight);
+            handleTileMapCollisionForCollider(collider, collidingTopLeft, collidingTopRight, collidingBottomLeft, collidingBottomRight);
         }
 
         return;
     }
 
+    /**
+     * Counts the number of corners which have a tilemap collision.
+     * @param collidingTopLeft  A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     * @param collidingTopRight A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     * @param collidingBottomLeft   A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     * @param collidingBottomRight  A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     * @return  An int which is the number of corners of a collider which are colliding with the tilemap.
+     */
     private int countCollidingCorners(boolean collidingTopLeft, boolean collidingTopRight,
                                       boolean collidingBottomLeft, boolean collidingBottomRight)
     {
@@ -339,6 +441,14 @@ public class PhysicsEngine
         return collidingCorners;
     }
 
+    /**
+     * Handles tilemap collisions for a collider when two corners are colliding with the tilemap.
+     * @param collider  A Collider object which is in collision with the tilemap.
+     * @param collidingTopLeft  A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     * @param collidingTopRight A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     * @param collidingBottomLeft   A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     * @param collidingBottomRight  A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     */
     private void handleTwoCornerTileCollision(Collider collider, boolean collidingTopLeft, boolean collidingTopRight,
                                               boolean collidingBottomLeft, boolean collidingBottomRight)
     {
@@ -363,6 +473,14 @@ public class PhysicsEngine
         }
     }
 
+    /**
+     * Handles tilemap collisions for a collider when one corner is colliding with the tilemap.
+     * @param collider  A Collider object which is in collision with the tilemap.
+     * @param collidingTopLeft  A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     * @param collidingTopRight A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     * @param collidingBottomLeft   A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     * @param collidingBottomRight  A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     */
     private void handleOneCornerTileCollision(Collider collider, boolean collidingTopLeft, boolean collidingTopRight,
                                               boolean collidingBottomLeft, boolean collidingBottomRight)
     {
@@ -412,11 +530,19 @@ public class PhysicsEngine
         }
     }
 
-    private void handleTileMapCollisionForEntity(Collider collider,
-                                                 boolean collidingTopLeft,
-                                                 boolean collidingTopRight,
-                                                 boolean collidingBottomLeft,
-                                                 boolean collidingBottomRight)
+    /**
+     * Computes and applies the tile map collision for this update cycle for a collider which has collided with the tilemap.
+     * @param collider  A Collider object which is in collision with the tilemap.
+     * @param collidingTopLeft  A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     * @param collidingTopRight A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     * @param collidingBottomLeft   A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     * @param collidingBottomRight  A boolean describing whether or not this corner of a collider is overlapping a collide-able map tile.
+     */
+    private void handleTileMapCollisionForCollider(Collider collider,
+                                                   boolean collidingTopLeft,
+                                                   boolean collidingTopRight,
+                                                   boolean collidingBottomLeft,
+                                                   boolean collidingBottomRight)
     {
         //get colliding corner count
         int collidingCorners = countCollidingCorners(collidingTopLeft, collidingTopRight, collidingBottomLeft, collidingBottomRight);
@@ -431,12 +557,17 @@ public class PhysicsEngine
         }
     }
 
+    /**
+     * Moves the collider to escape a tilemap collision, and also sets it's velocity to head away from the tile.
+     * @param collider  A Collider which is in collision with the tilemap.
+     * @param direction An enum describing the direction to move the collider to get out of the collision.
+     */
     private void moveColliderToGetAwayFromTile(Collider collider, EDirection direction)
     {
         if (direction == EDirection.up)
         {
             collider.setYSpeed(-collider.getYSpeed() * this.speedLossDueToTileMapCollision);  //Reverse the y-axis velocity.
-            collider.setYCoord(collider.getYCoord() - getYAxisGridOffset(collider) + heightDiffBetweenEntitySizeAndTileSize(collider));  //Move the collider up out of the collision.
+            collider.setYCoord(collider.getYCoord() - getYAxisGridOffset(collider) + heightDiffBetweenColliderSizeAndTileSize(collider));  //Move the collider up out of the collision.
             handleMinimumSpeed(collider);
 
             collider.bouncedOffTile();
@@ -452,7 +583,7 @@ public class PhysicsEngine
         else if (direction == EDirection.left)
         {
             collider.setXSpeed(-collider.getXSpeed() * this.speedLossDueToTileMapCollision);  //Reverse the x-axis velocity.
-            collider.setXCoord(collider.getXCoord() - getXAxisGridOffset(collider) + widthDiffBetweenEntitySizeAndTileSize(collider));  //Move the collider left out of the collision.
+            collider.setXCoord(collider.getXCoord() - getXAxisGridOffset(collider) + widthDiffBetweenColliderSizeAndTileSize(collider));  //Move the collider left out of the collision.
             handleMinimumSpeed(collider);
 
             collider.bouncedOffTile();
@@ -467,38 +598,53 @@ public class PhysicsEngine
         }
     }
 
-    private float widthDiffBetweenEntitySizeAndTileSize(Collider collider)
+    /**
+     * Computes the difference between the width of a collider and the tile width of the tile map.
+     * @param collider  A Collider object.
+     * @return  A float which is the difference between the width of the collider and the width of the map tiles in pixels.
+     */
+    private float widthDiffBetweenColliderSizeAndTileSize(Collider collider)
     {
         float difference = this.tileMap.getTileWidth() - collider.getWidth();
 
         return difference;
     }
 
-    private float heightDiffBetweenEntitySizeAndTileSize(Collider collider)
+    /**
+     * Computes the difference between the height of a collider and the tile height of the tile map.
+     * @param collider  A Collider object.
+     * @return  A float which is the difference between the height of the collider and the height of the map tiles in pixels.
+     */
+    private float heightDiffBetweenColliderSizeAndTileSize(Collider collider)
     {
         float difference = this.tileMap.getTileHeight() - collider.getHeight();
 
         return difference;
     }
 
+    /**
+     * Computes how far from being aligned (with the top edge of the tile it is on) this collider is.
+     * @param collider  A Collider object, for which the vertical alignment is required.
+     * @return  A float which is the vertical distance to the top of the current map tile.
+     */
     private float getYAxisGridOffset(Collider collider)
     {
         return collider.getYCoord() % this.tileMap.getTileHeight();
     }
 
+    /**
+     * Computes how far from being aligned (with the left edge of the tile it is on) this collider is.
+     * @param collider  A Collider object, for which the horizontal alignment is required.
+     * @return  A float which is the horizontal distance to the top of the current map tile.
+     */
     private float getXAxisGridOffset(Collider collider)
     {
         return collider.getXCoord() % this.tileMap.getTileWidth();
     }
 
-    public enum EFaceOfCollider
-    {
-        topFace,
-        bottomFace,
-        leftFace,
-        rightFace
-    }
-
+    /**
+     * An enum which describes the four directions a collider can move in.
+     */
     public enum EDirection
     {
         up,

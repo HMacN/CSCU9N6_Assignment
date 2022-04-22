@@ -95,7 +95,7 @@ public class CargoCrate implements IDrawable, IHasCollider
     }
 
     @Override
-    public void hasCollidedWith(Object object)
+    public void hasCollidedWith(IHasCollider parentOfOtherCollider)
     {
 
     }

@@ -122,7 +122,7 @@ public class LevelGameState implements IGameState, KeyListener
             }
             else
             {
-                event.setCurrentTime(this.millisInState);
+                event.updateCurrentTime(this.millisInState);
             }
         }
 

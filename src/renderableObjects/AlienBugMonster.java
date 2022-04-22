@@ -114,9 +114,9 @@ public class AlienBugMonster implements IHasCollider, IDrawable
     }
 
     @Override
-    public void hasCollidedWith(Object object)
+    public void hasCollidedWith(IHasCollider parentOfOtherCollider)
     {
-        if (object.getClass().equals(Bullet.class))
+        if (parentOfOtherCollider.getClass().equals(Bullet.class))
         {
             die();
         }

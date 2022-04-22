@@ -7,12 +7,19 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.LinkedList;
 
+/**
+ * A class which captures all the user inputs, and which can be subscribed to for event notifications.
+ */
 public class UserInputHandler implements MouseListener, KeyListener
 {
-    private JFrame window;
-    private LinkedList<MouseListener> mouseListeners = new LinkedList<>();
-    private LinkedList<KeyListener> keyListeners = new LinkedList<>();
+    private JFrame window;  //The JFrame to listen to for user input events.
+    private LinkedList<MouseListener> mouseListeners = new LinkedList<>();  //Subscribers for mouse events.
+    private LinkedList<KeyListener> keyListeners = new LinkedList<>();  //Subscribers for keyboard events.
 
+    /**
+     * The constructor.  Immediately registers this object with a given JFrame to listen for updates.
+     * @param window    A JFrame to listen to for user input events.
+     */
     public UserInputHandler(JFrame window)
     {
         this.window = window;
@@ -20,16 +27,28 @@ public class UserInputHandler implements MouseListener, KeyListener
         this.window.addKeyListener(this);
     }
 
+    /**
+     * Allow an object to subscribe for mouse events.
+     * @param listener  A MouseListener object to give future event notifications to.
+     */
     public void addMouseListener(MouseListener listener)
     {
         this.mouseListeners.add(listener);
     }
 
+    /**
+     * Allow an object to subscribe for keyboard events.
+     * @param listener  A KeyboardListener object to give future event notifications to.
+     */
     public void addKeyListener(KeyListener listener)
     {
         this.keyListeners.add(listener);
     }
 
+    /**
+     * Notifies all relevant subscribers of a new user input event.
+     * @param e The new user input event to give to all relevant subscribers.
+     */
     @Override
     public void mouseClicked(MouseEvent e)
     {
@@ -39,6 +58,10 @@ public class UserInputHandler implements MouseListener, KeyListener
         }
     }
 
+    /**
+     * Notifies all relevant subscribers of a new user input event.
+     * @param e The new user input event to give to all relevant subscribers.
+     */
     @Override
     public void mousePressed(MouseEvent e)
     {
@@ -48,6 +71,10 @@ public class UserInputHandler implements MouseListener, KeyListener
         }
     }
 
+    /**
+     * Notifies all relevant subscribers of a new user input event.
+     * @param e The new user input event to give to all relevant subscribers.
+     */
     @Override
     public void mouseReleased(MouseEvent e)
     {
@@ -57,6 +84,10 @@ public class UserInputHandler implements MouseListener, KeyListener
         }
     }
 
+    /**
+     * Notifies all relevant subscribers of a new user input event.
+     * @param e The new user input event to give to all relevant subscribers.
+     */
     @Override
     public void mouseEntered(MouseEvent e)
     {
@@ -66,6 +97,10 @@ public class UserInputHandler implements MouseListener, KeyListener
         }
     }
 
+    /**
+     * Notifies all relevant subscribers of a new user input event.
+     * @param e The new user input event to give to all relevant subscribers.
+     */
     @Override
     public void mouseExited(MouseEvent e)
     {
@@ -75,6 +110,10 @@ public class UserInputHandler implements MouseListener, KeyListener
         }
     }
 
+    /**
+     * Notifies all relevant subscribers of a new user input event.
+     * @param e The new user input event to give to all relevant subscribers.
+     */
     @Override
     public void keyTyped(KeyEvent e)
     {
@@ -84,6 +123,10 @@ public class UserInputHandler implements MouseListener, KeyListener
         }
     }
 
+    /**
+     * Notifies all relevant subscribers of a new user input event.
+     * @param e The new user input event to give to all relevant subscribers.
+     */
     @Override
     public void keyPressed(KeyEvent e)
     {
@@ -93,6 +136,10 @@ public class UserInputHandler implements MouseListener, KeyListener
         }
     }
 
+    /**
+     * Notifies all relevant subscribers of a new user input event.
+     * @param e The new user input event to give to all relevant subscribers.
+     */
     @Override
     public void keyReleased(KeyEvent e)
     {

@@ -9,6 +9,10 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+/**
+ * A button to be displayed on screen.  Displays a different sprite when clicked on.
+ * Notifies another object that it has been pressed by calling a method on an attribute object which acts as a function pointer.
+ */
 public class GameButton implements IDrawable, MouseListener
 {
     private final Sprite pressedSprite;
@@ -26,6 +30,15 @@ public class GameButton implements IDrawable, MouseListener
     private int clickBoundaryRight;
     private boolean visible = false;
 
+    /**
+     * The constructor.
+     * @param screenWidth   A float which is the width of the screen in pixels
+     * @param screenHeight  A float which is the height of the screen in pixels
+     * @param unPressedSprite   A Sprite, which will be displayed before the button is pressed
+     * @param pressedSprite A Sprite, which will be displayed after the button is pressed
+     * @param inputHandler  A UserInputHandler object, to register with for mouse events
+     * @param functionObject    An object which will call whatever function the button is supposed to perform.
+     */
     public GameButton(float screenWidth, float screenHeight, Sprite unPressedSprite, Sprite pressedSprite, UserInputHandler inputHandler, IButtonFunctionObject functionObject)
     {
         this.screenWidth = screenWidth;
@@ -37,10 +50,11 @@ public class GameButton implements IDrawable, MouseListener
 
         this.inputHandler = inputHandler;
         inputHandler.addMouseListener(this);
-
-        //setUpClickBoundaries();
     }
 
+    /**
+     * Computes and stores the region of the screen that the button covers.
+     */
     private void setUpClickBoundaries()
     {
         this.clickBoundaryTop = (int) this.sprite.getY();
@@ -50,6 +64,12 @@ public class GameButton implements IDrawable, MouseListener
         this.clickBoundaryRight = (int) this.sprite.getX() + this.sprite.getWidth();
     }
 
+    /**
+     * Draws the button to the display area.
+     * @param graphics2D	The Graphics2D object to draw this object on.
+     * @param xOffset	A float which is the horizontal offset in pixels to draw this object at.
+     * @param yOffset	A float which is the vertical offset in pixels to draw this object at.
+     */
     @Override
     public void draw(Graphics2D graphics2D, float xOffset, float yOffset)
     {
@@ -58,57 +78,81 @@ public class GameButton implements IDrawable, MouseListener
     }
 
     /**
-     * @param entityUpdate
+     * Updates the displayed sprite.
+     * @param entityUpdate	An EntityUpdate object containing the update information for this update cycle.
      */
+    @Override
     public void update(EntityUpdate entityUpdate)
     {
         this.sprite.update(entityUpdate.getMillisSinceLastUpdate());
-
-        //setUpClickBoundaries();
     }
 
     /**
-     * @param parallax
+     * Getter for the horizontal speed of the sprite.
+     * @return  A float which is the horizontal speed of the sprite in pixels per millisecond
      */
-    public void setParallax(float parallax)
-    {
-
-    }
-
     public float getXSpeed()
     {
         return this.sprite.getVelocityX();
     }
 
+    /**
+     * Set the horizontal speed of this object's sprite.
+     * @param xSpeed	A float which is the new horizontal speed in pixels per millisecond.
+     */
+    @Override
     public void setXSpeed(float xSpeed)
     {
         this.pressedSprite.setVelocityX(xSpeed);
         this.unPressedSprite.setVelocityX(xSpeed);
     }
 
+    /**
+     * A getter for the vertical speed of this object's sprite.
+     * @return  A float which is the vertical speed of this object's sprite in pixels per millisecond
+     */
     public float getYSpeed()
     {
         return this.sprite.getVelocityY();
     }
 
+    /**
+     * Set the vertical speed of this object's sprite.
+     * @param ySpeed	A float which is the new vertical speed in pixels per millisecond.
+     */
+    @Override
     public void setYSpeed(float ySpeed)
     {
         this.pressedSprite.setVelocityY(ySpeed);
         this.unPressedSprite.setVelocityY(ySpeed);
     }
 
+    /**
+     * A setter for the x-coordinate of the sprite.
+     * @param xCoord    A float which is the new x-coord of the sprite.
+     */
     public void setXCoord(float xCoord)
     {
         this.pressedSprite.setX(xCoord);
         this.unPressedSprite.setX(xCoord);
     }
 
+    /**
+     * A setter for the y-coordinate of the sprite.
+     * @param yCoord    A float which is the new y-coord of the sprite.
+     */
     public void setYCoord(float yCoord)
     {
         this.pressedSprite.setY(yCoord);
         this.unPressedSprite.setY(yCoord);
     }
 
+
+    /**
+     * A getter for the self-destruct flag.  Allows this object to be removed when the player can no longer see it.
+     * @return	A boolean describing whether this object can be removed when out of sight.
+     */
+    @Override
     public boolean getSelfDestructWhenOffScreen()
     {
         if (!this.selfDestructWhenOffScreen)
@@ -130,11 +174,18 @@ public class GameButton implements IDrawable, MouseListener
         return false;
     }
 
+    /**
+     * A setter for the self-destruct flag.  Allows this object to be removed when the player can no longer see it.
+     */
     public void setSelfDestructWhenOffScreen()
     {
         this.selfDestructWhenOffScreen = true;
     }
 
+    /**
+     * Checks if the button is being displayed, and then checks if the user has clicked inside it's boundary.
+     * @param e A MouseEvent to handle.
+     */
     @Override
     public void mouseClicked(MouseEvent e)
     {
@@ -144,7 +195,7 @@ public class GameButton implements IDrawable, MouseListener
             return;
         }
 
-        setUpClickBoundaries();
+        setUpClickBoundaries(); //Confirm where the button covers.
 
         if (e.getX() < this.clickBoundaryRight
                 && e.getX() > this.clickBoundaryLeft
@@ -152,31 +203,31 @@ public class GameButton implements IDrawable, MouseListener
                 && e.getY() < this.clickBoundaryBottom)
         {
             this.sprite = this.pressedSprite;
-            this.buttonFunctionObject.onButtonPress();
+            this.buttonFunctionObject.onButtonPress();  //Call the function of the button.
         }
     }
 
     @Override
     public void mousePressed(MouseEvent e)
     {
-
+        //Needed for interface
     }
 
     @Override
     public void mouseReleased(MouseEvent e)
     {
-
+        //Needed for interface
     }
 
     @Override
     public void mouseEntered(MouseEvent e)
     {
-
+        //Needed for interface
     }
 
     @Override
     public void mouseExited(MouseEvent e)
     {
-
+        //Needed for interface
     }
 }

@@ -8,6 +8,9 @@ import physics.IHasCollider;
 
 import java.awt.*;
 
+/**
+ * A cargo crate to put in the SpaceShip.  These are basically just physics entities for the player to interact with.
+ */
 public class CargoCrate implements IDrawable, IHasCollider
 {
     private Sprite sprite;
@@ -26,6 +29,12 @@ public class CargoCrate implements IDrawable, IHasCollider
         this.screenHeight = screenHeight;
     }
 
+    /**
+     * Calls the draw function of this object's sprite, and applies any horizontal or vertical offset.
+     * @param graphics2D	The Graphics2D object to draw this object on.
+     * @param xOffset	A float which is the horizontal offset in pixels to draw this object at.
+     * @param yOffset	A float which is the vertical offset in pixels to draw this object at.
+     */
     @Override
     public void draw(Graphics2D graphics2D, float xOffset, float yOffset)
     {
@@ -44,24 +53,40 @@ public class CargoCrate implements IDrawable, IHasCollider
         this.sprite.drawTransformed(graphics2D);
     }
 
+    /**
+     * Updates this object for this update cycle, and performs any state changes that this object may need to undergo.
+     * @param entityUpdate	An EntityUpdate object containing the update information for this update cycle.
+     */
     @Override
     public void update(EntityUpdate entityUpdate)
     {
         this.sprite.update(entityUpdate.getMillisSinceLastUpdate());
     }
 
+    /**
+     * Set the horizontal speed of this object's sprite.
+     * @param xSpeed	A float which is the new horizontal speed in pixels per millisecond.
+     */
     @Override
     public void setXSpeed(float xSpeed)
     {
         this.sprite.setVelocityX(xSpeed);
     }
 
+    /**
+     * Set the vertical speed of this object's sprite.
+     * @param ySpeed	A float which is the new vertical speed in pixels per millisecond.
+     */
     @Override
     public void setYSpeed(float ySpeed)
     {
         this.sprite.setVelocityY(ySpeed);
     }
 
+    /**
+     * A getter for the self-destruct flag.  Allows this object to be removed when the player can no longer see it.
+     * @return	A boolean describing whether this object can be removed when out of sight.
+     */
     @Override
     public boolean getSelfDestructWhenOffScreen()
     {
@@ -84,11 +109,18 @@ public class CargoCrate implements IDrawable, IHasCollider
         return false;
     }
 
+    /**
+     * A getter for this object's collider.
+     * @return  A Collider which has this object as it's parent.
+     */
     public Collider getCollider()
     {
         return collider;
     }
 
+    /**
+     * A setter for the self-destruct flag.  Allows this object to be removed when the player can no longer see it.
+     */
     public void setSelfDestructWhenOffScreen()
     {
         this.selfDestructWhenOffScreen = true;
@@ -97,12 +129,12 @@ public class CargoCrate implements IDrawable, IHasCollider
     @Override
     public void hasCollidedWith(IHasCollider parentOfOtherCollider)
     {
-
+        //Needed for the interface
     }
 
     @Override
     public void collidedWithTile()
     {
-
+        //Needed for the interface
     }
 }

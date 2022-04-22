@@ -18,6 +18,9 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+/**
+ * The player's in-game avatar.
+ */
 public class Player implements IDrawable, KeyListener, IHasCollider
 {
     private Sprite movingSprite = SpriteFactory.getSpriteFromPNGFile("playerAnim", 1, 4, 60);
@@ -47,6 +50,12 @@ public class Player implements IDrawable, KeyListener, IHasCollider
     private boolean rightKeyPressed = false;
     private float controlAuthority = 0.1f;
 
+    /**
+     * The constructor.
+     * @param spaceshipGame A SpaceShipGame object to interrogate for needed data.
+     * @param xCoord    A float which is the horizontal starting coordinate of the collider in pixels.
+     * @param yCoord    A float which is the vertical starting coordinate of the collider in pixels.
+     */
     public Player(SpaceshipGame spaceshipGame, float xCoord, float yCoord)
     {
         this.spaceshipGame = spaceshipGame;
@@ -73,11 +82,18 @@ public class Player implements IDrawable, KeyListener, IHasCollider
         this.bulletFactory = new BulletFactory(spaceshipGame, spaceshipGame.getGameObjects());
     }
 
+    /**
+     * A getter for this object's collider.
+     * @return  A Collider object which is owned by this object.
+     */
     public Collider getCollider()
     {
         return collider;
     }
 
+    /**
+     * Handles everything that needs to happen when the player dies.  Starts the shutdown process for the level.
+     */
     private void die()
     {
         this.dead = true;
@@ -87,6 +103,12 @@ public class Player implements IDrawable, KeyListener, IHasCollider
         this.level.addLevelEvent(new PrepareToEndLevel(this.spaceshipGame, EGameState.mainMenu), 0);
     }
 
+    /**
+     * Draws the current sprite to the display area.
+     * @param graphics2D	The Graphics2D object to draw this object on.
+     * @param xOffset	A float which is the horizontal offset in pixels to draw this object at.
+     * @param yOffset	A float which is the vertical offset in pixels to draw this object at.
+     */
     @Override
     public void draw(Graphics2D graphics2D, float xOffset, float yOffset)
     {
@@ -94,6 +116,10 @@ public class Player implements IDrawable, KeyListener, IHasCollider
         this.sprite.drawTransformed(graphics2D);
     }
 
+    /**
+     * Performs all needed changes for this update cycle.
+     * @param entityUpdate	An EntityUpdate object containing the update information for this update cycle.
+     */
     @Override
     public void update(EntityUpdate entityUpdate)
     {
@@ -111,6 +137,9 @@ public class Player implements IDrawable, KeyListener, IHasCollider
         setSpriteAndControlSpeedForPlayerState();
     }
 
+    /**
+     * Changes the sprite and animation for the player based on the state that the player is currently in.
+     */
     private void setSpriteAndControlSpeedForPlayerState()
     {
         switch (this.playerState)
@@ -177,6 +206,10 @@ public class Player implements IDrawable, KeyListener, IHasCollider
         }
     }
 
+    /**
+     * Checks the tilemap to see if the player is on a ladder and sets the collider to ignore gravity if so.
+     * This represents the player grabbing on to a ladder if they are falling.
+     */
     private void workOutIfOnLadderAndSetColliderToIgnoreGravityIfSo()
     {
         if (TilemapHelper.isThisPointOnALadder(this.collider.getXAxisCentroid(), this.collider.getYAxisCentroid(), this.tileMap))
@@ -195,23 +228,39 @@ public class Player implements IDrawable, KeyListener, IHasCollider
         }
     }
 
+    /**
+     * A setter for the sprite's horizontal speed.
+     * @param xSpeed	A float which is the new horizontal speed in pixels per millisecond.
+     */
     @Override
     public void setXSpeed(float xSpeed)
     {
         this.sprite.setVelocityX(xSpeed);
     }
 
+    /**
+     * A setter for the sprite's vertical speed.
+     * @param ySpeed	A float which is the new vertical speed in pixels per millisecond.
+     */
     @Override
     public void setYSpeed(float ySpeed)
     {
         this.sprite.setVelocityY(ySpeed);
     }
 
+    /**
+     * Sets the self destruct flag, which allows the object to be removed when it leaves the render area.
+     */
+    @Override
     public void setSelfDestructWhenOffScreen()
     {
         this.selfDestructWhenOffScreen = true;
     }
 
+    /**
+     * Getter for the self-destruct status of the player.  Only true if the player is off-screen and due to be removed.
+     * @return  A boolean which is true if the player sprite is safe to remove from the game.
+     */
     @Override
     public boolean getSelfDestructWhenOffScreen()
     {
@@ -242,9 +291,13 @@ public class Player implements IDrawable, KeyListener, IHasCollider
     @Override
     public void keyTyped(KeyEvent e)
     {
-
+        //Needed by the interface
     }
 
+    /**
+     * Handles user inputs.  Only used to start the player moving on screen.
+     * @param e A KeyEvent to respond to.
+     */
     @Override
     public void keyPressed(KeyEvent e)
     {
@@ -291,6 +344,10 @@ public class Player implements IDrawable, KeyListener, IHasCollider
         }
     }
 
+    /**
+     * Handles user input.  Used to fire the gun, and to stop the player moving when a movement key is released.
+     * @param e A KeyEvent to respond to.
+     */
     @Override
     public void keyReleased(KeyEvent e)
     {
@@ -342,6 +399,9 @@ public class Player implements IDrawable, KeyListener, IHasCollider
         }
     }
 
+    /**
+     * Adds a new bullet to the game world, which should be heading in the direction the player is facing.
+     */
     private void spawnABulletInTheCorrectDirection()
     {
         float bulletStartingX = this.collider.getXAxisCentroid();
@@ -362,6 +422,10 @@ public class Player implements IDrawable, KeyListener, IHasCollider
         }
     }
 
+    /**
+     * Checks how many key flags ae set, and returns false if more than one key is currently pressed.
+     * @return  A boolean which describes if more than one key is pressed.
+     */
     private boolean atMostOneKeyFlagSet()
     {
         int keys = 0;
@@ -381,6 +445,10 @@ public class Player implements IDrawable, KeyListener, IHasCollider
         return false;
     }
 
+    /**
+     * Stops the player moving horizontally if the player is not holding down a horizontal movement control key.
+     * Used to represent the player "grabbing on to" a ladder if they fall past it.
+     */
     private void stopHorizontalSpeedOnlyIfNotUnderPlayerControl()
     {
         if (this.collider.getXSpeed() > 0 && this.rightKeyPressed)  //If moving right under player control.
@@ -396,6 +464,10 @@ public class Player implements IDrawable, KeyListener, IHasCollider
         this.collider.setXSpeed(0.0f);  //Stop player moving horizontally.
     }
 
+    /**
+     * Works out if the player has collided with either a monster or a bullet, and calls the "die" function if so.
+     * @param parentOfOtherCollider An IHasCollider object which is the parent object of the other collider in the collision.
+     */
     @Override
     public void hasCollidedWith(IHasCollider parentOfOtherCollider)
     {
@@ -408,9 +480,12 @@ public class Player implements IDrawable, KeyListener, IHasCollider
     @Override
     public void collidedWithTile()
     {
-
+        //Needed for interface
     }
 
+    /**
+     * An enum which represents the different states a player object can be in.
+     */
     private enum EPlayerState
     {
         standingStill,

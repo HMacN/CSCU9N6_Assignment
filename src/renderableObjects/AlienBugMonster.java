@@ -11,6 +11,9 @@ import spaceShipGame.SpaceshipGame;
 import java.awt.*;
 import java.util.Random;
 
+/**
+ * A monster for the player to fight.  Contains a physics object, and has an on-screen animation.
+ */
 public class AlienBugMonster implements IHasCollider, IDrawable
 {
     private Collider collider;
@@ -27,7 +30,12 @@ public class AlienBugMonster implements IHasCollider, IDrawable
     private float controlAuthority = 0.1f;
     private int millisUntilNextTurn = 3_000;
 
-
+    /**
+     * The constructor.
+     * @param spaceshipGame A SpaceShipGame object to interrogate for needed data.
+     * @param xCoord    A float describing the starting x-axis coordinate for this monster.
+     * @param yCoord    A float describing the starting y-axis coordinate for this monster.
+     */
     public AlienBugMonster(SpaceshipGame spaceshipGame, float xCoord, float yCoord)
     {
         this.spaceshipGame = spaceshipGame;
@@ -42,6 +50,11 @@ public class AlienBugMonster implements IHasCollider, IDrawable
         this.collider.setXControlSpeed(controlAuthority);
     }
 
+    /**
+     * The simple AI for this monster.  Causes it to growl, jump, and turn at semi-random intervals.
+     * Does nothing if this monster is dead.
+     * @param millisSinceLastUpdate A long which is the time since the last update in milliseconds.
+     */
     private void handleAI(long millisSinceLastUpdate)
     {
         if (this.dead)
@@ -54,6 +67,10 @@ public class AlienBugMonster implements IHasCollider, IDrawable
         handleTurning(millisSinceLastUpdate);
     }
 
+    /**
+     * Adds a growl to the game sounds list at semi-random intervals.
+     * @param millisSinceLastUpdate A long which is the time since the last update in milliseconds.
+     */
     private void handleGrowling(long millisSinceLastUpdate)
     {
         this.millisSinceLastGrowl = this.millisSinceLastGrowl + millisSinceLastUpdate;
@@ -66,6 +83,10 @@ public class AlienBugMonster implements IHasCollider, IDrawable
         }
     }
 
+    /**
+     * Makes the monster jump at semi-random intervals.
+     * @param millisSinceLastUpdate A long which is the time since the last update in milliseconds.
+     */
     private void handleJumping(long millisSinceLastUpdate)
     {
         this.millisSinceLastJump = this.millisSinceLastJump + millisSinceLastUpdate;
@@ -78,6 +99,10 @@ public class AlienBugMonster implements IHasCollider, IDrawable
         }
     }
 
+    /**
+     * Makes the monster change direction at semi-random intervals.
+     * @param millisSinceLastUpdate A long which is the time since the last update in milliseconds.
+     */
     private void handleTurning(long millisSinceLastUpdate)
     {
         this.millisSinceLastTurn = this.millisSinceLastTurn + millisSinceLastUpdate;
@@ -96,11 +121,18 @@ public class AlienBugMonster implements IHasCollider, IDrawable
         }
     }
 
+    /**
+     * A getter for this object's collider.
+     * @return  A Collider object which belongs to this object.
+     */
     public Collider getCollider()
     {
         return this.collider;
     }
 
+    /**
+     * Handles setting the scale of the displayed sprite.  Used to show which way the monster is facing.
+     */
     private void scaleSpriteCorrectly()
     {
         if (goingLeft)
@@ -113,6 +145,10 @@ public class AlienBugMonster implements IHasCollider, IDrawable
         }
     }
 
+    /**
+     * Checks if the monster has collided with a bullet, and sets it to "dead" if so.
+     * @param parentOfOtherCollider An IHasCollider object which is the parent object of the other collider in the collision.
+     */
     @Override
     public void hasCollidedWith(IHasCollider parentOfOtherCollider)
     {
@@ -122,6 +158,9 @@ public class AlienBugMonster implements IHasCollider, IDrawable
         }
     }
 
+    /**
+     * Performs all updates needed for monster death.
+     */
     private void die()
     {
         this.dead = true;
@@ -133,9 +172,15 @@ public class AlienBugMonster implements IHasCollider, IDrawable
     @Override
     public void collidedWithTile()
     {
-
+        //Needed for interface.
     }
 
+    /**
+     * Updates the sprite position and draws it to the screen.
+     * @param graphics2D	The Graphics2D object to draw this object on.
+     * @param xOffset	A float which is the horizontal offset in pixels to draw this object at.
+     * @param yOffset	A float which is the vertical offset in pixels to draw this object at.
+     */
     @Override
     public void draw(Graphics2D graphics2D, float xOffset, float yOffset)
     {
@@ -154,6 +199,10 @@ public class AlienBugMonster implements IHasCollider, IDrawable
         this.sprite.drawTransformed(graphics2D);
     }
 
+    /**
+     * Updates the sprite and AI for this update cycle.
+     * @param entityUpdate	An EntityUpdate object containing the update information for this update cycle.
+     */
     @Override
     public void update(EntityUpdate entityUpdate)
     {
@@ -162,18 +211,30 @@ public class AlienBugMonster implements IHasCollider, IDrawable
         handleAI(entityUpdate.getMillisSinceLastUpdate());
     }
 
+    /**
+     * Setter for the sprite horizontal speed.
+     * @param xSpeed	A float which is the new horizontal speed in pixels per millisecond.
+     */
     @Override
     public void setXSpeed(float xSpeed)
     {
         this.sprite.setVelocityX(xSpeed);
     }
 
+    /**
+     * Setter for the sprite vertical speed.
+     * @param ySpeed	A float which is the new vertical speed in pixels per millisecond.
+     */
     @Override
     public void setYSpeed(float ySpeed)
     {
         this.sprite.setVelocityY(ySpeed);
     }
 
+    /**
+     * Getter for the self-destruct flag.  Allows the object to be removed when it is out of sight of the player.
+     * @return  A boolean describing if the object may be safely removed.
+     */
     @Override
     public boolean getSelfDestructWhenOffScreen()
     {
@@ -202,6 +263,9 @@ public class AlienBugMonster implements IHasCollider, IDrawable
         return false;
     }
 
+    /**
+     * Sets the self destruct flag of this object to "true".
+     */
     @Override
     public void setSelfDestructWhenOffScreen()
     {

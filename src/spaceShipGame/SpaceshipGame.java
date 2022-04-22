@@ -31,7 +31,7 @@ public class SpaceshipGame extends GameCore
 
     //Set up classes to handle the in-game logic.
     private PhysicsEngine physics;
-    private EntityUpdateFactory entityUpdateFactory = new EntityUpdateFactory();
+    private EntityUpdateFactory entityUpdateFactory = new EntityUpdateFactory(SCREEN_WIDTH, SCREEN_HEIGHT);
     private IGameState gameState;
     private EGameState nextState;
 
@@ -179,7 +179,7 @@ public class SpaceshipGame extends GameCore
         this.levelEventFactory.addSpawnEvent(monster, this.gameObjects.getTileMap(), this.monsterFactory, 15_000);
 
         //End the level after a couple of minutes.
-        this.levelEventFactory.addPrepareToEndLevelEvent(mainMenu, 60_000);
+        this.levelEventFactory.addPrepareToEndLevelEvent(mainMenu, 120_000);
     }
 
     /**
@@ -210,7 +210,7 @@ public class SpaceshipGame extends GameCore
         this.levelEventFactory.addSpawnEvent(monster, this.gameObjects.getTileMap(), this.monsterFactory, 15_000);
 
         //End the level after a couple of minutes.
-        this.levelEventFactory.addPrepareToEndLevelEvent(mainMenu, 60_000);
+        this.levelEventFactory.addPrepareToEndLevelEvent(mainMenu, 120_000);
     }
 
     /**
@@ -241,7 +241,7 @@ public class SpaceshipGame extends GameCore
         this.levelEventFactory.addSpawnEvent(monster, this.gameObjects.getTileMap(), this.monsterFactory, 15_000);
 
         //End the level after a couple of minutes.
-        this.levelEventFactory.addPrepareToEndLevelEvent(mainMenu, 60_000);
+        this.levelEventFactory.addPrepareToEndLevelEvent(mainMenu, 120_000);
     }
 
 

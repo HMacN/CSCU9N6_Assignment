@@ -141,9 +141,9 @@ public class BackgroundEntity implements IDrawable
 	{
 		//Note that the negative of the screen width is used here instead of the negative of the sprite width due to sprite.getWidth() not working.
 
-		if (this.sprite.getX() < this.screenWidth && this.sprite.getX() > (-1 * this.screenWidth))   //If the sprite is still likely to get rendered.
+		if (this.sprite.getX() < (1.5 * this.screenWidth) && this.sprite.getX() > (-1 * this.screenWidth))   //If the sprite is still likely to get rendered.
 		{
-			if (this.sprite.getY() < this.screenHeight && this.sprite.getY() > (-1 * this.screenHeight)) //If the sprite is still likely to get rendered.
+			if (this.sprite.getY() < (1.5 * this.screenHeight) && this.sprite.getY() > (-1 * this.screenHeight)) //If the sprite is still likely to get rendered.
 			{
 				return false;
 			}

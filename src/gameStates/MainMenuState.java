@@ -28,7 +28,7 @@ import static spaceShipGame.GameObjects.ERenderLayer.*;
 public class MainMenuState implements IGameState
 {
     private GameObjects gameObjects;
-    private StarFieldGenerator starfieldGenerator = new StarFieldGenerator();
+    private StarFieldGenerator starfieldGenerator;
     private EntityUpdateFactory updateFactory;
     private MIDIPlayer backgroundMusic;
     private UserInputHandler inputHandler;
@@ -62,6 +62,7 @@ public class MainMenuState implements IGameState
         this.inputHandler = this.spaceshipGame.getUserInputHandler();
         this.updateFactory = this.spaceshipGame.getEntityUpdateFactory();
         this.eventFactory = new LevelEventFactory(this.spaceshipGame);
+        this.starfieldGenerator = new StarFieldGenerator(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
 
         //Set up the menu.
 

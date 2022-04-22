@@ -24,6 +24,15 @@ public class StarFieldGenerator
     private long leftOverAreaToAddToNextUpdate;
     private float parallax;
 
+    private int screenHeight;
+    private int screenWidth;
+
+    public StarFieldGenerator(int screenWidth, int screenHeight)
+    {
+        this.screenHeight = screenHeight;
+        this.screenWidth = screenWidth;
+    }
+
     /**
      * Creates a list of the stars to add to GameObjects
      * @param entityUpdate  An EntityUpdate object to interrogate for data
@@ -43,7 +52,7 @@ public class StarFieldGenerator
         //Spawn stars on the xAxis.
         for (int i = 0; i < xAxisStars; i++)
         {
-            BackgroundEntity newStar = generateRandomStar(this.entityUpdate.getScreenWidth(), this.entityUpdate.getScreenHeight());
+            BackgroundEntity newStar = generateRandomStar();
             configureStarSpeed(newStar);
             configureStarLocationIfSpaceshipTravellingInXAxis(newStar);
             listOfStars.add(newStar);
@@ -52,7 +61,7 @@ public class StarFieldGenerator
         //Spawn stars on the yAxis.
         for (int i = 0; i < yAxisStars; i++)
         {
-            BackgroundEntity newStar = generateRandomStar(this.entityUpdate.getScreenWidth(), this.entityUpdate.getScreenHeight());
+            BackgroundEntity newStar = generateRandomStar();
             configureStarSpeed(newStar);
             configureStarLocationIfSpaceshipTravellingInYAxis(newStar);
             listOfStars.add(newStar);
@@ -63,14 +72,12 @@ public class StarFieldGenerator
 
     /**
      * Creates a star (BackgroundEntity) to be added to the game.
-     * @param screenWidth   An int which is the width of the display area in pixels
-     * @param screenHeight  An int which is the height of the display area in pixels
      * @return
      */
-    private BackgroundEntity generateRandomStar(int screenWidth, int screenHeight)
+    private BackgroundEntity generateRandomStar()
     {
         //Instantiate background entity.
-        BackgroundEntity starToReturn = new BackgroundEntity(screenWidth, screenHeight);
+        BackgroundEntity starToReturn = new BackgroundEntity(this.screenWidth, this.screenHeight);
 
         //Set up sprite.
         Animation starAnimation = new Animation();
@@ -100,7 +107,7 @@ public class StarFieldGenerator
     private void configureStarLocationIfSpaceshipTravellingInXAxis(BackgroundEntity star)
     {
         star.setYCoord(random.nextInt(this.entityUpdate.getScreenHeight()));
-
+        
         if (star.getXSpeed() < 0)
         {
             star.setXCoord(this.entityUpdate.getScreenWidth());
@@ -127,6 +134,7 @@ public class StarFieldGenerator
         {
             star.setYCoord(0);
         }
+
     }
 
     /**

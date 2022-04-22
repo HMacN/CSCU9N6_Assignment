@@ -5,11 +5,9 @@
 package gameStates;
 
 import CSCU9N6Library.TileMap;
-import factories.CargoCrateFactory;
-import factories.MonsterFactory;
-import factories.PlayerFactory;
+import factories.*;
 import helperClasses.EntityUpdate;
-import factories.EntityUpdateFactory;
+import helperClasses.TilemapHelper;
 import levelEvents.*;
 import spaceShipGame.GameObjects;
 import helperClasses.StarFieldGenerator;
@@ -30,12 +28,11 @@ public class LevelGameState implements IGameState, KeyListener
     private SpaceshipGame spaceshipGame;
     private EntityUpdateFactory updateFactory;
     private GameObjects gameObjects;
-    private StarFieldGenerator starFieldGenerator = new StarFieldGenerator();
+    private StarFieldGenerator starFieldGenerator;
     private TileMap tileMap;
 
-    private PlayerFactory playerFactory;
-    private CargoCrateFactory crateFactory;
     private MonsterFactory monsterFactory;
+    private LevelEventFactory levelEventFactory;
     private PhysicsEngine physicsEngine;
 
     private long millisInState = 0;
@@ -61,10 +58,11 @@ public class LevelGameState implements IGameState, KeyListener
 
         this.gameObjects.addTileMap(this.tileMap);
         this.physicsEngine.setTileMap(this.tileMap);
+        this.starFieldGenerator = new StarFieldGenerator(this.spaceshipGame.getScreenWidth(), this.spaceshipGame.getScreenHeight());
 
-        this.playerFactory = new PlayerFactory(this.spaceshipGame, this.gameObjects);
-        this.crateFactory = new CargoCrateFactory(this.spaceshipGame, this.gameObjects);
         this.monsterFactory = new MonsterFactory(this.spaceshipGame, this.gameObjects);
+        this.levelEventFactory = new LevelEventFactory(this.spaceshipGame);
+        this.levelEventFactory.setGameState(this);
 
         this.spaceshipGame.getUserInputHandler().addKeyListener(this);
     }
@@ -155,7 +153,6 @@ public class LevelGameState implements IGameState, KeyListener
 
     /**
      * registers keys being released and performs appropriate actions.
-     * "Enter" key: clears all events and return the game to the main menu.
      * @param e A KeyEvent from the keyboard
      */
     @Override
@@ -170,6 +167,68 @@ public class LevelGameState implements IGameState, KeyListener
             }
 
             addLevelEvent(new PrepareToEndLevel(this.spaceshipGame, EGameState.mainMenu), 0);
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_NUMPAD5)
+        {
+            //Spawn a new wave of monsters.
+            this.levelEventFactory.addSpawnEvent(TilemapHelper.ETileType.monster, this.tileMap, this.monsterFactory, 0);
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_NUMPAD8)
+        {
+            //Set spaceship to going up.
+            this.levelEventFactory.addGravityShiftEvent(0.0f, 0.000_3f, 0);
+            this.levelEventFactory.addShipManoeuvreEvent(0.0f, -0.3f, 0);
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_NUMPAD9)
+        {
+            //Set spaceship to going up and right.
+            this.levelEventFactory.addGravityShiftEvent(-0.000_3f, 0.000_3f, 0);
+            this.levelEventFactory.addShipManoeuvreEvent(0.3f, -0.3f, 0);
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_NUMPAD6)
+        {
+            //Set spaceship to going right.
+            this.levelEventFactory.addGravityShiftEvent(-0.000_3f, 0.0f, 0);
+            this.levelEventFactory.addShipManoeuvreEvent(0.3f, 0.0f, 0);
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_NUMPAD3)
+        {
+            //Set spaceship to going down and right.
+            this.levelEventFactory.addGravityShiftEvent(-0.000_3f, -0.000_3f, 0);
+            this.levelEventFactory.addShipManoeuvreEvent(0.3f, 0.3f, 0);
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_NUMPAD2)
+        {
+            //Set spaceship to going down.
+            this.levelEventFactory.addGravityShiftEvent(0.0f, -0.000_3f, 0);
+            this.levelEventFactory.addShipManoeuvreEvent(0.0f, 0.3f, 0);
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_NUMPAD1)
+        {
+            //Set spaceship to going down and left.
+            this.levelEventFactory.addGravityShiftEvent(0.000_3f, -0.000_3f, 0);
+            this.levelEventFactory.addShipManoeuvreEvent(-0.3f, 0.3f, 0);
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_NUMPAD4)
+        {
+            //Set spaceship to going left.
+            this.levelEventFactory.addGravityShiftEvent(0.000_3f, 0.000_0f, 0);
+            this.levelEventFactory.addShipManoeuvreEvent(-0.3f, 0.0f, 0);
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_NUMPAD7)
+        {
+            //Set spaceship to going up and left.
+            this.levelEventFactory.addGravityShiftEvent(0.000_3f, 0.000_3f, 0);
+            this.levelEventFactory.addShipManoeuvreEvent(-0.3f, -0.3f, 0);
         }
     }
 }

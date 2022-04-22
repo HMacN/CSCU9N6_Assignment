@@ -16,8 +16,19 @@ public class EntityUpdateFactory
     private float playerYOffset = 0.0f;
     private float spaceshipXSpeed = 0.0f;
     private float spaceshipYSpeed = 0.0f;
-    private int screenWidth = 0;
-    private int screenHeight = 0;
+    private int screenWidth;
+    private int screenHeight;
+
+    /**
+     * The Constructor
+     * @param screenWidth   An int which is the width of the display area in pixels.
+     * @param screenHeight  An int which is the height of the display area in pixels.
+     */
+    public EntityUpdateFactory(int screenWidth, int screenHeight)
+    {
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
+    }
 
     /**
      * Generates a new update object to pass to other game objects and systems.

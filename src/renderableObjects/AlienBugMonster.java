@@ -1,3 +1,7 @@
+//  Assignment submission for CSCU9N6
+//  Student Number: 2823735/1
+//  Date of Submission: 22/04/2022
+
 package renderableObjects;
 
 import CSCU9N6Library.Sprite;
@@ -79,7 +83,7 @@ public class AlienBugMonster implements IHasCollider, IDrawable
         {
             millisSinceLastGrowl = 0;
 
-            this.spaceshipGame.getGameObjects().addSound(new DistanceSound("sounds/growl.wav", this.spaceshipGame, this.collider));
+            this.spaceshipGame.getGameObjects().addSound(new DistanceSound("sounds/growl.wav", this.spaceshipGame, this.sprite));
         }
     }
 
@@ -166,7 +170,7 @@ public class AlienBugMonster implements IHasCollider, IDrawable
         this.dead = true;
         this.sprite.hide();
         this.collider.setToSelfDestruct();
-        this.spaceshipGame.getGameObjects().addSound(new DistanceSound("sounds/splat.wav", this.spaceshipGame, this.collider));
+        this.spaceshipGame.getGameObjects().addSound(new DistanceSound("sounds/splat.wav", this.spaceshipGame, this.sprite));
     }
 
     @Override

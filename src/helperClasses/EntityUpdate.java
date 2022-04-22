@@ -1,6 +1,8 @@
-package helperClasses;
+//  Assignment submission for CSCU9N6
+//  Student Number: 2823735/1
+//  Date of Submission: 22/04/2022
 
-import java.awt.*;
+package helperClasses;
 
 /**
  * A container class for the data generated on each update.  Passed to most classes and systems to be interrogated for the needed data.

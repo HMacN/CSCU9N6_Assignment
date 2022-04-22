@@ -1,7 +1,11 @@
+//  Assignment submission for CSCU9N6
+//  Student Number: 2823735/1
+//  Date of Submission: 22/04/2022
+
 package soundsAndMusic;
 
 import CSCU9N6Library.Sound;
-import physics.Collider;
+import CSCU9N6Library.Sprite;
 import spaceShipGame.SpaceshipGame;
 
 /**
@@ -11,18 +15,18 @@ public class DistanceSound extends Sound implements IGameSound
 {
     private SpaceshipGame spaceshipGame;
     private float maxDistance = 1_000.0f;
-    private Collider collider;
+    private Sprite soundSource;
 
     /**
      * The constructor.
      * @param fileName  A String which is the name of the file to play.
      * @param spaceshipGame A SpaceshipGame object to interrogate for needed data.
-     * @param collider  A Collider object to get the sound location from.
+     * @param soundSource  A Sprite object to get the sound location from.
      */
-    public DistanceSound(String fileName, SpaceshipGame spaceshipGame, Collider collider)
+    public DistanceSound(String fileName, SpaceshipGame spaceshipGame, Sprite soundSource)
     {
         super(fileName);
-        this.collider = collider;
+        this.soundSource = soundSource;
         this.spaceshipGame = spaceshipGame;
     }
 
@@ -39,20 +43,17 @@ public class DistanceSound extends Sound implements IGameSound
     }
 
     /**
-     * Works out the volume based on the difference between the player location and the collider location.  Returns zero if the player is beyond the maximum range of the sound.
+     * Works out the volume based on the difference between the player location and the sprite location.  Returns zero if the player is beyond the maximum range of the sound.
      * @return  A float which is the factor to multiply the sound amplitude by.
      */
     private float calculateVolume()
     {
-        float volume = 1.0f;
 
-        volume = volume * (calculateMaxDistanceMinusActualDistance() / this.maxDistance);
-
-        return volume;
+        return (calculateMaxDistanceMinusActualDistance() / this.maxDistance);
     }
 
     /**
-     * Computes the distance between the player and the source of the sound.  Returns zero if the actual distance is larger than the maximum.
+     * Computes the difference between the maximum distance to hear sounds at and the actual distance.  Returns zero if the actual distance is larger than the maximum.
      * @return  A float which is the difference in pixels between the distance to the player and the maximum distance the sound can be heard at.
      */
     private float calculateMaxDistanceMinusActualDistance()
@@ -71,11 +72,8 @@ public class DistanceSound extends Sound implements IGameSound
      */
     private float calculateDistanceToPlayer()
     {
-        //float xDistance = this.collider.getXAxisCentroid() - this.gameObjects.getPlayerXOffset();
-        //float yDistance = this.collider.getYAxisCentroid() - this.gameObjects.getPlayerYOffset();
-
-        float xDistance = this.collider.getXAxisCentroid() - (this.spaceshipGame.getScreenWidth() / 2.0f);
-        float yDistance = this.collider.getYAxisCentroid() - (this.spaceshipGame.getScreenHeight() / 2.0f);
+        float xDistance = this.soundSource.getX() - (this.spaceshipGame.getScreenWidth() / 2.0f);
+        float yDistance = this.soundSource.getY() - (this.spaceshipGame.getScreenHeight() / 2.0f);
 
         float totalDistance = (float) Math.sqrt((xDistance * xDistance) + (yDistance * yDistance));
 

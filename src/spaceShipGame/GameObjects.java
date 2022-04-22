@@ -1,3 +1,7 @@
+//  Assignment submission for CSCU9N6
+//  Student Number: 2823735/1
+//  Date of Submission: 22/04/2022
+
 package spaceShipGame;
 
 import CSCU9N6Library.TileMap;
@@ -52,7 +56,6 @@ public class GameObjects
     private float tileMapYSpeed = 0.0f;
     private float tileMapXLocation = 0.0f;
     private float tileMapYLocation = 0.0f;
-
     private float playerXOffset = 0.0f;
     private float playerYOffset = 0.0f;
 

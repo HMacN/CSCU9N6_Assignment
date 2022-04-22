@@ -1,3 +1,7 @@
+//  Assignment submission for CSCU9N6
+//  Student Number: 2823735/1
+//  Date of Submission: 22/04/2022
+
 package renderableObjects;
 
 import CSCU9N6Library.Sprite;
@@ -182,6 +186,6 @@ public class Bullet implements IDrawable, IHasCollider
     {
         this.sprite.hide();
         this.collider.setToSelfDestruct();
-        this.gameObjects.addSound(new DistanceSound("sounds/zap.wav", this.spaceshipGame, this.collider));
+        this.gameObjects.addSound(new DistanceSound("sounds/zap.wav", this.spaceshipGame, this.sprite));
     }
 }

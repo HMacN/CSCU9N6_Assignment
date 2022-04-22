@@ -3,6 +3,9 @@ package soundsAndMusic;
 import javax.sound.midi.*;
 import java.io.File;
 
+/**
+ * A class which plays MIDI files.
+ */
 public class MIDIPlayer extends Thread implements IGameSound
 {
     private String filename;
@@ -10,36 +13,18 @@ public class MIDIPlayer extends Thread implements IGameSound
     private Sequencer sequencer;
     private long startingTick;
 
+    /**
+     * The constructor
+     * @param filename A String which is the file to play.
+     */
     public MIDIPlayer(String filename)
     {
         this.filename = filename;
     }
 
-    public void setStartingTick(long tick)
-    {
-        this.startingTick = tick;
-    }
-
-    public void setSoloTrack(int track, boolean isSolo)
-    {
-        this.sequencer.setTrackSolo(track, isSolo);
-    }
-
-    public void stopPlaying()
-    {
-        //Handle the music not having started when instructed to stop.
-        if (sequencer == null)
-        {
-            System.out.println("MIDI Player encountered a problem: No music playing when instructed to stop.");
-        }
-        else
-        {
-            sequencer.close();
-        }
-
-        this.finished = true;
-    }
-
+    /**
+     * Starts the track playing.
+     */
     @Override
     public void run()
     {
@@ -55,7 +40,7 @@ public class MIDIPlayer extends Thread implements IGameSound
             sequencer.setSequence(score);
             sequencer.setTickPosition(this.startingTick);
             sequencer.start();
-            while (sequencer.isRunning() && !this.finished)
+            while (sequencer.isRunning() && !this.finished) //If "finished", stop the track.
             {
                 Thread.sleep(100);
             }
@@ -69,18 +54,28 @@ public class MIDIPlayer extends Thread implements IGameSound
         }
     }
 
+    /**
+     * A getter for the "finished" flag.
+     * @return  A boolean which indicates whether or not this sound is still playing.
+     */
     @Override
     public boolean getFinished()
     {
         return this.finished;
     }
 
+    /**
+     * Starts this sound playing.  Thread issues mean that MIDI files sometimes take a few seconds to start.
+     */
     @Override
     public void play()
     {
         this.start();
     }
 
+    /**
+     * Stops this sound from playing by setting the "finished" flag early.
+     */
     @Override
     public void finishPlaying()
     {

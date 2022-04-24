@@ -150,11 +150,13 @@ public class PhysicsEngine
         {
             if (attemptToMoveCollider(collider, 0.0f, horizontalDistance))  //If the collider can be moved
             {
-                processHorizontalImpulseTransfer(collider, otherCollider, false);    //Process the impulse exchange normally
+                //TODO Uncomment when fixed
+                //processHorizontalImpulseTransfer(collider, otherCollider, false);    //Process the impulse exchange normally
             }
             else
             {
-                processHorizontalImpulseTransfer(collider, otherCollider, true);    //Reflect the impulse back into the other collider.
+                //TODO Uncomment when fixed
+                //processHorizontalImpulseTransfer(collider, otherCollider, true);    //Reflect the impulse back into the other collider.
             }
 
             //Move collider horizontally.
@@ -166,11 +168,13 @@ public class PhysicsEngine
         {
             if (attemptToMoveCollider(collider, verticalDistance, 0.0f))  //If the collider can be moved
             {
-                processVerticalImpulseTransfer(collider, otherCollider, false);    //Process the impulse exchange normally
+                //TODO Uncomment when fixed
+                //processVerticalImpulseTransfer(collider, otherCollider, false);    //Process the impulse exchange normally
             }
             else
             {
-                processVerticalImpulseTransfer(collider, otherCollider, true);    //Reflect the impulse back into the other collider.
+                //TODO Uncomment when fixed
+                //processVerticalImpulseTransfer(collider, otherCollider, true);    //Reflect the impulse back into the other collider.
             }
 
             //Move collider vertically.
